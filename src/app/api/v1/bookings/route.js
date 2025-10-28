@@ -1,37 +1,30 @@
-import { NextResponse } from 'next/server';
-import { BooingServices } from '@/services/booking.service';
+import { NextResponse } from "next/server";
+import { Booking } from "@/models/Booking";
+import { Guest } from "@/models/Guest";
+import connectDB from "@/lib/db"; // your db connection helper
+import { BookingServices } from "@/services/booking.service";
 
-export async function GET(request) {
+// ✅ GET All Bookings
+export async function GET() {
+  await connectDB();
   try {
-    const result = await BooingServices.getAllRoomOrdersFromDB();
-    return NextResponse.json({
-      success: true,
-      message: "Fetched all room order data",
-      data: result
-    }, { status: 200 });
+    const bookings = await BookingServices.getAllBookingsFromDB();
+
+    return NextResponse.json(bookings, { status: 200 });
   } catch (error) {
-    return NextResponse.json({
-      success: false,
-      message: error.message || 'Something went wrong.',
-      data: null
-    }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
-export async function POST(request) {
+// ✅ CREATE Booking
+export async function POST(req) {
+  await connectDB();
   try {
-    const roomOrderData = await request.json();
-    const result = await BooingServices.orderRoomToDB(roomOrderData);
-    return NextResponse.json({
-      success: true,
-      message: "Room Successfully Ordered",
-      data: result
-    }, { status: 200 });
+    const bookingData = await req.json();
+    const booking = await BookingServices.postBookingToDB(bookingData);
+
+    return NextResponse.json(booking, { status: 201 });
   } catch (error) {
-    return NextResponse.json({
-      success: false,
-      message: error.message || 'Something went wrong.',
-      data: null
-    }, { status: 500 })
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

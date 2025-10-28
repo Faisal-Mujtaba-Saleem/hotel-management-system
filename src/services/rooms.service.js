@@ -8,7 +8,9 @@ const addRoomToDB = async (roomData) => {
 
 const searchAvailableRoomsFromDB = async (startDate, endDate, guests) => {
   const overlappingBookedRoomsIds = await Booking.distinct("room_id", {
-    startDate: { $lte: endDate }, endDate: { $gte: startDate }
+    startDate: { $lte: endDate },
+    endDate: { $gte: startDate },
+    status: { $ne: "Cancelled" }
   });
 
   if (overlappingBookedRoomsIds.length === 0) {
