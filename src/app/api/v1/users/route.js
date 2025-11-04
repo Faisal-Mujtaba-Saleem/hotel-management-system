@@ -1,4 +1,5 @@
 import { UserServices } from "@/services/user.service";
+import "@/lib/connectDB";
 import { NextResponse } from "next/server";
 
 export async function GET(request) {

@@ -3,7 +3,10 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ElementsHeightsProvider } from "@/contexts/elements-heights-context/context";
 import ModalContextProvider from "@/contexts/modal-context/context";
-import AppModal from "@/components/ViewerModal";
+import RoomsContextProvider from "@/contexts/rooms-context/context";
+import ViewerModal from "@/components/ViewerModal";
+import ToastProvider from "./providers/ToastProvider";
+import "react-toastify/dist/ReactToastify.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,8 +32,11 @@ export default function RootLayout({ children }) {
         >
           <ElementsHeightsProvider>
             <ModalContextProvider>
-              <AppModal />
-              {children}
+              <RoomsContextProvider>
+                <ViewerModal />
+                <ToastProvider />
+                {children}
+              </RoomsContextProvider>
             </ModalContextProvider>
           </ElementsHeightsProvider>
         </body>

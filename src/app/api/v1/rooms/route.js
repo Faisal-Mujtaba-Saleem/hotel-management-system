@@ -1,37 +1,36 @@
-import { RoomServices } from '@/services/rooms.service';
-import { NextResponse } from 'next/server';
+import "@/lib/connectDB";
+import { RoomServices } from "@/services/room.service";
+import { NextResponse } from "next/server";
 
-export async function GET(request) {
-    try {
-        const result = await RoomServices.getAllRoomFromDB();
-        return NextResponse.json({
-            success: true,
-            message: "Room Fetched Successfully",
-            data: result
-        }, { status: 200 });
-    } catch (error) {
-        return NextResponse.json({
-            success: false,
-            message: error.message || 'Something went wrong.',
-            data: null
-        }, { status: 500 });
-    }
+/** 🏠 POST → Add new room */
+export async function POST(req) {
+  try {
+    const body = await req.json();
+    const room = await RoomServices.uploadRoomToDB(body);
+    return NextResponse.json(room, { status: 201 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: error.statusCode || 500 }
+    );
+  }
 }
 
-export async function POST(request) {
-    try {
-        const roomData = await request.json();
-        const result = await RoomServices.addRoomToDB(roomData);
-        return NextResponse.json({
-            success: true,
-            message: "Room Successfully Created",
-            data: result
-        }, { status: 200 });
-    } catch (error) {
-        return NextResponse.json({
-            success: false,
-            message: error.message || 'Something went wrong.',
-            data: null
-        }, { status: 500 });
-    }
+/** 📖 GET → Get all rooms (with optional filters) */
+export async function GET(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const filters = {
+      status: searchParams.get("status") || undefined,
+      roomType: searchParams.get("roomType") || undefined,
+    };
+
+    const rooms = await RoomServices.getAllRoomsFromDB(filters);
+    return NextResponse.json(rooms, { status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: error.statusCode || 500 }
+    );
+  }
 }

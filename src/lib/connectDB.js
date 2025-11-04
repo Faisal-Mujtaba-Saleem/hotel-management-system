@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import config from "@/config/env";
 
-const connectDB = async () => {
+(async () => {
   try {
     const uri = config.mongodb_uri;
     if (!uri) throw new Error("MONGODB_URI is not defined");
@@ -43,6 +43,4 @@ const connectDB = async () => {
     console.error("Database connection error:", error.message);
     return null;
   }
-};
-
-export default connectDB;
+})();

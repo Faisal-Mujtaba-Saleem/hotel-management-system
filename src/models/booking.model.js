@@ -1,9 +1,9 @@
-// models/Booking.js
 import mongoose from "mongoose";
+import "@/models/room.model";
 
 const bookingSchema = new mongoose.Schema(
   {
-    room_id: {
+    room: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Room",
       required: true,
@@ -14,7 +14,7 @@ const bookingSchema = new mongoose.Schema(
 
     totalAmount: { type: Number, required: true },
     paidAmount: { type: Number, default: 0 },
-    payableAmount: { type: Number, required: true },
+    paidAmount: { type: Number, required: true },
 
     paymentStatus: {
       type: String,
@@ -77,13 +77,7 @@ bookingSchema.pre(["findOneAndUpdate", "updateOne"], function (next) {
 
   // Handle payment logic if paidAmount or totalAmount updated
   if (update.paidAmount !== undefined || update.totalAmount !== undefined) {
-    if (update.paidAmount >= update.totalAmount) {
-      update.paymentStatus = "Paid";
-    } else if (update.paidAmount > 0) {
-      update.paymentStatus = "Pending";
-    } else {
-      update.paymentStatus = "Pending";
-    }
+    applyPaymentLogic(update);
   }
 
   this.setUpdate(update);

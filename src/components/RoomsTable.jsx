@@ -6,52 +6,17 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 import { FaEdit } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { useElementsHeights } from "@/contexts/elements-heights-context/context";
+import { useDialog } from "@/contexts/modal-context/context";
+import { useRooms } from "@/contexts/rooms-context/context";
+import EditRoomModal from "./EditRoomModal";
 
 export default function RoomsTable() {
-  const rooms = [
-    {
-      image: "https://i.postimg.cc/KYGtGJT0/Deluxe-Twin-1-min.jpg",
-      roomId: "DLX-001",
-      roomName: "Deluxe Twin Room",
-      pricePerNight: 120,
-      status: "Booked",
-      guestName: "John Doe",
-      checkInDate: "2025-10-15",
-      checkOutDate: "2025-10-18",
-    },
-    {
-      image: "https://i.postimg.cc/6q3C6tcd/Superior-King-1-min.jpg",
-      roomId: "SUP-002",
-      roomName: "Superior King Room",
-      pricePerNight: 150,
-      status: "Available",
-      guestName: null,
-      checkInDate: null,
-      checkOutDate: null,
-    },
-    {
-      image: "https://i.postimg.cc/x8VZX3P9/Executive-Suite-1-min.jpg",
-      roomId: "EXS-003",
-      roomName: "Executive Suite",
-      pricePerNight: 220,
-      status: "Booked",
-      guestName: "Emily Clark",
-      checkInDate: "2025-10-17",
-      checkOutDate: "2025-10-20",
-    },
-    {
-      image: "https://i.postimg.cc/yN1C1N8v/Standard-Single-1-min.jpg",
-      roomId: "STD-004",
-      roomName: "Standard Single Room",
-      pricePerNight: 80,
-      status: "Maintenance",
-      guestName: null,
-      checkInDate: null,
-      checkOutDate: null,
-    },
-  ];
-
+  const { rooms, loading, error, fetchRooms, deleteRoom } = useRooms();
   const { topbarHeight, headerHeight } = useElementsHeights();
+  const { populateModal } = useDialog();
+  
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState(null);
 
   // Pagination state / config
   const [currentPage, setCurrentPage] = useState(1);
@@ -64,6 +29,13 @@ export default function RoomsTable() {
     window.addEventListener("resize", handleResize);
     getPageSize(); // initial call
     return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Fetch rooms from API
+  useEffect(() => {
+    const ac = new AbortController();
+    fetchRooms(ac.signal);
+    return () => ac.abort();
   }, []);
 
   const totalPages = Math.max(1, Math.ceil(rooms.length / pageSize));
@@ -90,84 +62,166 @@ export default function RoomsTable() {
     setCurrentPage(p);
   }
 
+  // Handle edit room
+  const handleEdit = (e, room) => {
+    e.stopPropagation();
+    setSelectedRoom(room);
+    setIsEditModalOpen(true);
+  };
+
+  const handleRoomUpdate = (updatedRoom) => {
+    setRooms((prev) => prev.map((r) => (r._id === updatedRoom._id ? updatedRoom : r)));
+  };
+
+  // Handle delete room
+  const handleDelete = async (e, roomId) => {
+    e.stopPropagation();
+    if (!window.confirm("Are you sure you want to delete this room?")) return;
+    try {
+      await deleteRoom(roomId);
+    } catch (err) {
+      // Error is already handled in context with toast
+      console.error(err);
+    }
+  };
+
+  function handleViewDetails(selectedRoom) {
+    // prepare modal JSX and show
+    const imgSrc = selectedRoom.img || selectedRoom.image || "/placeholder.jpg";
+    const modalTitle = `Room — ${selectedRoom.name || selectedRoom.room_no || "#"}`;
+    const modalDesc = (
+      <div className="flex flex-col gap-3">
+        <div className="flex justify-center">
+          <Image src={imgSrc} alt="Room" width={360} height={220} className="rounded-lg object-cover" />
+        </div>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <p className="font-medium text-gray-700">Room No:</p>
+          <p>{selectedRoom.room_no ?? "—"}</p>
+          <p className="font-medium text-gray-700">Name:</p>
+          <p>{selectedRoom.name ?? "—"}</p>
+          <p className="font-medium text-gray-700">Type:</p>
+          <p>{selectedRoom.roomType ?? "—"}</p>
+          <p className="font-medium text-gray-700">Price:</p>
+          <p>{selectedRoom.price ?? "—"}</p>
+          <p className="font-medium text-gray-700">Capacity:</p>
+          <p>{selectedRoom.capacity ?? "—"}</p>
+          <p className="font-medium text-gray-700">Status:</p>
+          <p>{selectedRoom.status ?? "—"}</p>
+          <p className="font-medium text-gray-700">Features:</p>
+          <p>{(selectedRoom.features || []).join(", ") || "—"}</p>
+        </div>
+      </div>
+    );
+
+    populateModal(modalTitle, modalDesc);
+  }
+
   return (
     <div className="overflow-x-auto bg-white pb-5 mx-6 rounded shadow-sm">
       <table className="table w-full mx-auto">
         <thead className="bg-[#0284c7] text-white text-sm">
           <tr>
             <th className="p-3 text-start">Image</th>
-            <th className="p-3 text-start">Room ID</th>
-            <th className="p-3 text-start">Room Name</th>
-            <th className="p-3 text-start">Guest Name</th>
-            <th className="p-3 text-start">Check In</th>
-            <th className="p-3 text-start">Check Out</th>
-            <th className="p-3 text-start">Price/Night</th>
+            <th className="p-3 text-start">Room No</th>
+            <th className="p-3 text-start">Name</th>
+            <th className="p-3 text-start">Type</th>
+            <th className="p-3 text-start">Price</th>
+            <th className="p-3 text-start">Capacity</th>
+            <th className="p-3 text-start">Features</th>
             <th className="p-3 text-start">Status</th>
             <th className="text-center py-3 w-[80px]">Action</th>
           </tr>
         </thead>
         <tbody>
-          {visibleRooms.map((room, index) => (
-            <tr
-              ref={tr_Ref}
-              key={index}
-              className="hover border-b border-gray-300"
-            >
-              <td className="p-2">
-                <Image
-                  className="w-20 h-[45px] rounded object-cover"
-                  src={room.image}
-                  alt={`Room ${room.roomId}`}
-                  width={80}
-                  height={45}
-                />
-              </td>
-              <td className="p-3">{room.roomId}</td>
-              <td className="p-3">{room.roomName}</td>
-              <td className="p-3">{room.guestName || "-"}</td>
-              <td className="p-3">{room.checkInDate || "-"}</td>
-              <td className="p-3">{room.checkOutDate || "-"}</td>
-              <td className="p-3">${room.pricePerNight}</td>
-              <td className="p-3">
-                <span
-                  className={`px-2 py-1 rounded text-sm ${
-                    room.status === "Available"
-                      ? "bg-green-100 text-green-700"
-                      : room.status === "Booked"
-                      ? "bg-blue-100 text-blue-700"
-                      : "bg-yellow-100 text-yellow-700"
-                  }`}
-                >
-                  {room.status}
-                </span>
-              </td>
-              <td className="flex gap-1 justify-center items-center py-3">
-                <button className="hover:text-red-100 hover:bg-red-500 flex justify-center p-1 rounded mx-auto">
-                  <TrashIcon className="w-5 h-5 text-red-600 hover:text-white" />
-                </button>
-                <button className="hover:bg-green-500 flex justify-center p-1 rounded mx-auto">
-                  <FaEdit className="w-5 h-5 text-green-500 hover:text-gray-100" />
-                </button>
-                <button
-                  className="text-blue-500 hover:text-blue-100 hover:bg-blue-500 p-1 rounded transition flex items-center justify-center"
-                  title="View Details"
-                >
-                  <IoEyeOutline size={18} />
-                </button>
+          {loading ? (
+            <tr>
+              <td colSpan={9} className="p-4 text-center text-sm text-gray-500">
+                Loading rooms...
               </td>
             </tr>
-          ))}
+          ) : error ? (
+            <tr>
+              <td colSpan={9} className="p-4 text-center text-sm text-red-600">Error: {error}</td>
+            </tr>
+          ) : visibleRooms.length === 0 ? (
+            <tr>
+              <td colSpan={9} className="p-4 text-center text-sm text-gray-500">No rooms found</td>
+            </tr>
+          ) : (
+            visibleRooms.map((room, index) => {
+              const imgSrc = room.img || room.image || "/placeholder.jpg";
+              const roomNo = room.room_no || "—";
+              const name = room.name || "—";
+              const roomType = room.roomType || "—";
+              const price = room.price ?? "—";
+              const capacity = room.capacity ?? "—";
+              const features = Array.isArray(room.features) ? room.features.join(", ") : (room.features || "—");
+              const status = room.status || "—";
+
+              return (
+                <tr ref={tr_Ref} key={room._id || index} className="hover border-b border-gray-300">
+                  <td className="p-2">
+                    <Image className="w-20 h-[45px] rounded object-cover" src={imgSrc} alt={`Room ${roomNo}`} width={80} height={45} />
+                  </td>
+                  <td className="p-3">{roomNo}</td>
+                  <td className="p-3">{name}</td>
+                  <td className="p-3">
+                    <span className={`px-2 py-1 rounded-full text-xs ${roomType === "Suite" ? "bg-purple-100 text-purple-700" :
+                        roomType === "Deluxe" ? "bg-blue-100 text-blue-700" :
+                          roomType === "Standard" ? "bg-green-100 text-green-700" :
+                            roomType === "Family" ? "bg-orange-100 text-orange-700" :
+                              "bg-gray-100 text-gray-700"
+                      }`}>
+                      {roomType}
+                    </span>
+                  </td>
+                  <td className="p-3">{typeof price === "number" ? `$${price}` : price}</td>
+                  <td className="p-3">{capacity} {capacity !== "—" ? "guests" : ""}</td>
+                  <td className="p-3 max-w-[200px] truncate" title={features}>{features}</td>
+                  <td className="p-3">
+                    <span className={`px-2 py-1 rounded-full text-xs ${status === "available" ? "bg-green-100 text-green-700" :
+                        status === "maintenance" ? "bg-yellow-100 text-yellow-700" :
+                          "bg-gray-100 text-gray-700"
+                      }`}>
+                      {status}
+                    </span>
+                  </td>
+                  <td className="flex gap-1 justify-center items-center py-3">
+                    <button title="View details" onClick={() => handleViewDetails(room)} className="text-blue-500 hover:text-blue-100 hover:bg-blue-500 p-1 rounded transition flex items-center justify-center">
+                      <IoEyeOutline size={18} />
+                    </button>
+
+                    <button title="Edit room" onClick={(e) => handleEdit(e, room)} className="hover:bg-green-500 flex justify-center p-1 rounded mx-auto">
+                      <FaEdit className="w-5 h-5 text-green-500 hover:text-gray-100" />
+                    </button>
+
+                    <button title="Delete room" onClick={(e) => handleDelete(e, room._id)} className="hover:text-red-100 hover:bg-red-500 flex justify-center p-1 rounded mx-auto">
+                      <TrashIcon className="w-5 h-5 text-red-600 hover:text-white" />
+                    </button>
+
+                  </td>
+                </tr>
+              );
+            })
+          )}
         </tbody>
       </table>
+
+      {/* Edit Room Modal */}
+      <EditRoomModal
+        isOpen={isEditModalOpen}
+        closeModal={() => setIsEditModalOpen(false)}
+        room={selectedRoom}
+        onUpdate={handleRoomUpdate}
+      />
 
       {/* Pagination */}
       <div className="flex justify-end pr-6 pt-5 border-t border-gray-100">
         <ul className="flex items-center gap-1 text-sm">
           <li>
             <button
-              className={`px-3 py-[5px] border border-gray-100 rounded bg-[#0284c7] text-white ${
-                currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`px-3 py-[5px] border border-gray-100 rounded bg-[#0284c7] text-white ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               onClick={() => goToPage(currentPage - 1)}
               disabled={currentPage === 1}
             >
@@ -179,11 +233,10 @@ export default function RoomsTable() {
             <li key={page}>
               <button
                 onClick={() => goToPage(page)}
-                className={`px-3 py-[5px] border border-gray-100 rounded ${
-                  page === currentPage
+                className={`px-3 py-[5px] border border-gray-100 rounded ${page === currentPage
                     ? "bg-[#0284c7] text-white"
                     : "hover:bg-gray-100 transition"
-                }`}
+                  }`}
               >
                 {page}
               </button>
@@ -192,11 +245,10 @@ export default function RoomsTable() {
 
           <li>
             <button
-              className={`px-3 py-[5px] border border-gray-100 rounded bg-[#0284c7] text-white ${
-                currentPage === totalPages
+              className={`px-3 py-[5px] border border-gray-100 rounded bg-[#0284c7] text-white ${currentPage === totalPages
                   ? "opacity-50 cursor-not-allowed"
                   : ""
-              }`}
+                }`}
               onClick={() => goToPage(currentPage + 1)}
               disabled={currentPage === totalPages}
             >

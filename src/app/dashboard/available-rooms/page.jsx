@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
+import Image from "next/image";
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -10,21 +11,10 @@ import {
 import { FaBed } from "react-icons/fa";
 import { useSearchParams } from "next/navigation";
 import { formatCurrency } from "@/utlis/formatCurrency";
-import Image from "next/image";
 import { useDialog } from "@/contexts/modal-context/context";
 import RoomCard from "@/components/RoomCard";
-import { Button } from "@headlessui/react";
 import { BookingModal } from "@/components/BookingModal";
-
-/* ---------- Toast ---------- */
-function Toast({ show, message }) {
-  if (!show) return null;
-  return (
-    <div className="fixed right-5 bottom-5 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
-      {message}
-    </div>
-  );
-}
+import calculateNights from "@/utlis/calculateNights";
 
 /* ---------- Main Page ---------- */
 export default function Page() {
@@ -35,10 +25,9 @@ export default function Page() {
   const [sortBy, setSortBy] = useState("recommended");
   const [selected, setSelected] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [guestsCount, setguestsCount] = useState(null);
+  const [guestRange, setGuestRange] = useState({ min: "", max: "" });
   const [checkIn, setCheckIn] = useState(null);
   const [checkOut, setCheckOut] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -60,9 +49,6 @@ export default function Page() {
 
     const checkOutDate = searchParams.get("checkOutDate");
     if (checkOutDate) setCheckOut(checkOutDate);
-
-    const guests = searchParams.get("guests");
-    if (guests) setguestsCount(Number(guests));
   }, [searchParams]);
 
   // Fetch available rooms from API when search params change
@@ -74,10 +60,9 @@ export default function Page() {
         const params = new URLSearchParams();
         if (checkIn) params.append("checkInDate", checkIn);
         if (checkOut) params.append("checkOutDate", checkOut);
-        if (guestsCount) params.append("guests", guestsCount);
 
         const res = await fetch(
-          `/api/v1/rooms/search-available-rooms?${params.toString()}`
+          `/api/v1/rooms/available?${params.toString()}`
         );
         if (!res.ok) throw new Error(`Server returned ${res.status}`);
         const body = await res.json();
@@ -103,7 +88,7 @@ export default function Page() {
     };
 
     fetchRooms();
-  }, [checkIn, checkOut, guestsCount, refreshKey]);
+  }, [checkIn, checkOut, refreshKey]);
 
   const handleBook = (room) => {
     setSelected(room);
@@ -113,16 +98,10 @@ export default function Page() {
   function handleViewDetails(selectedRoom) {
     const modalTitle = `Room Details - ${selectedRoom.name || "Unnamed room"}`;
     // Try to read checkIn/checkOut from URL search params to calculate total
-    let nights = null;
-    if (checkIn && checkOut) {
-      const ciDate = new Date(checkIn);
-      const coDate = new Date(checkOut);
-      if (!isNaN(ciDate) && !isNaN(coDate)) {
-        const diffMs = coDate.getTime() - ciDate.getTime();
-        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-        nights = diffDays > 0 ? diffDays : null;
-      }
-    }
+    const nights = useMemo(
+      () => calculateNights(checkIn, checkOut),
+      [checkIn, checkOut]
+    );
 
     const modalDescriptionJSX = (
       <div className="space-y-6 p-4 bg-gradient-to-b from-white to-gray-50 rounded-2xl shadow-inner">
@@ -147,8 +126,7 @@ export default function Page() {
             <h4 className="text-xl font-semibold text-gray-900 tracking-tight">
               {selectedRoom.name || "Unnamed Room"}{" "}
               <span className="font-medium text-gray-700">
-                -
-                {" "}{selectedRoom.room_no ?? "—"}
+                - {selectedRoom.room_no ?? "—"}
               </span>
             </h4>
             <p className="text-sm text-gray-500 mt-1">
@@ -161,7 +139,10 @@ export default function Page() {
 
             <p className="mt-3 text-lg font-semibold text-blue-600">
               {formatCurrency(selectedRoom.price ?? 0)}
-              <span className="text-sm font-normal text-gray-500"> / night</span>
+              <span className="text-sm font-normal text-gray-500">
+                {" "}
+                / night
+              </span>
             </p>
           </div>
         </div>
@@ -215,21 +196,16 @@ export default function Page() {
     populateModal(modalTitle, modalDescriptionJSX);
   }
 
-  const confirmBooking = ({ room, name, date }) => {
-    setRooms((prev) =>
-      prev.map((r) => (r.id === room.id ? { ...r, available: false } : r))
-    );
-    setShowModal(false);
-    setToast({
-      show: true,
-      message: `Booking confirmed — ${room.name} on ${date} for ${name}`,
-    });
-    setTimeout(() => setToast({ show: false, message: "" }), 4000);
-  };
-
   const filtered = useMemo(() => {
     let list = [...rooms];
     if (typeFilter !== "All") list = list.filter((r) => r.type === typeFilter);
+    // Apply guest range filter
+    if (guestRange.min !== "") {
+      list = list.filter((r) => r.capacity >= Number(guestRange.min));
+    }
+    if (guestRange.max !== "") {
+      list = list.filter((r) => r.capacity <= Number(guestRange.max));
+    }
     if (query.trim()) {
       const q = query.toLowerCase();
       list = list.filter((r) =>
@@ -244,7 +220,7 @@ export default function Page() {
     if (sortBy === "capacity-desc")
       list.sort((a, b) => b.capacity - a.capacity);
     return list;
-  }, [rooms, typeFilter, query, sortBy]);
+  }, [rooms, typeFilter, query, sortBy, guestRange]);
 
   return (
     <main className="min-h-screen bg-gray-50 p-6 text-gray-800">
@@ -270,19 +246,21 @@ export default function Page() {
 
           <div className="flex bg-gray-100 rounded-lg">
             <button
-              className={`p-2 rounded-md ${view === "grid"
-                ? "bg-white shadow text-blue-600"
-                : "text-gray-500"
-                }`}
+              className={`p-2 rounded-md ${
+                view === "grid"
+                  ? "bg-white shadow text-blue-600"
+                  : "text-gray-500"
+              }`}
               onClick={() => setView("grid")}
             >
               <Squares2X2Icon className="w-5 h-5" />
             </button>
             <button
-              className={`p-2 rounded-md ${view === "list"
-                ? "bg-white shadow text-blue-600"
-                : "text-gray-500"
-                }`}
+              className={`p-2 rounded-md ${
+                view === "list"
+                  ? "bg-white shadow text-blue-600"
+                  : "text-gray-500"
+              }`}
               onClick={() => setView("list")}
             >
               <Bars3Icon className="w-5 h-5" />
@@ -295,11 +273,18 @@ export default function Page() {
       <div className="mb-4">
         {loading && <div className="text-sm text-gray-600">Loading rooms…</div>}
         {error && <div className="text-sm text-red-600">Error: {error}</div>}
-        {guestsCount && (
+        {(checkIn || checkOut) && (
           <div className="flex items-center gap-2 mt-2">
-            <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded">
-              Guests: {guestsCount}
-            </span>
+            {checkIn && (
+              <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded">
+                Check-in: {new Date(checkIn).toLocaleDateString()}
+              </span>
+            )}
+            {checkOut && (
+              <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded">
+                Check-out: {new Date(checkOut).toLocaleDateString()}
+              </span>
+            )}
           </div>
         )}
       </div>
@@ -330,8 +315,35 @@ export default function Page() {
           <option value="capacity-desc">Capacity: High → Low</option>
         </select>
 
+        {/* Guest Range Filter */}
+        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2 shadow-sm">
+          <span className="text-sm text-gray-500">Guests:</span>
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              min="1"
+              placeholder="Min"
+              value={guestRange.min}
+              onChange={(e) => setGuestRange(prev => ({ ...prev, min: e.target.value }))}
+              className="w-16 bg-transparent outline-none text-sm text-gray-700 border-b border-gray-200 focus:border-blue-500"
+            />
+            <span className="text-gray-400">-</span>
+            <input
+              type="number"
+              min="1"
+              placeholder="Max"
+              value={guestRange.max}
+              onChange={(e) => setGuestRange(prev => ({ ...prev, max: e.target.value }))}
+              className="w-16 bg-transparent outline-none text-sm text-gray-700 border-b border-gray-200 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
         <div className="flex items-center gap-2 mt-2">
-          <button className="px-2 py-1 bg-blue-50 text-blue-700 rounded" onClick={() => setRefreshKey(prev => prev + 1)}>
+          <button
+            className="px-2 py-1 bg-blue-50 text-blue-700 rounded"
+            onClick={() => setRefreshKey((prev) => prev + 1)}
+          >
             Refresh
           </button>
         </div>
@@ -342,10 +354,11 @@ export default function Page() {
       </section>
 
       <section
-        className={`grid gap-4 ${view === "grid"
-          ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-          : "grid-cols-1"
-          }`}
+        className={`grid gap-4 ${
+          view === "grid"
+            ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            : "grid-cols-1"
+        }`}
       >
         {filtered.length === 0 ? (
           <div className="bg-white border rounded-lg p-6 text-center shadow-sm">
@@ -380,10 +393,9 @@ export default function Page() {
         open={showModal}
         room={selected}
         onClose={() => setShowModal(false)}
-        onConfirm={confirmBooking}
-        bookingParams={{ checkIn, checkOut, guestsCount }}
+        bookingParams={{ checkIn, checkOut }}
+        refresher={() => setRefreshKey((prev) => prev + 1)}
       />
-      <Toast show={toast.show} message={toast.message} />
     </main>
   );
 }

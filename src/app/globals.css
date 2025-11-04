@@ -45,6 +45,10 @@ button {
   cursor: pointer;
 }
 
+th, td {
+  white-space: nowrap;
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.8s ease-in-out both;
 }

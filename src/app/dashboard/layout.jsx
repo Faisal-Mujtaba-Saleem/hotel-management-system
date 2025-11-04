@@ -1,6 +1,5 @@
 import React from "react";
-import Link from "next/link";
-import DashboardLayoutClientWrapper from "@/components/DashboardLayoutClientWrapper";
+import DashboardLayoutClient from "@/components/DashboardLayoutClient";
 
 export const metadata = {
   title: "Dashboard - Hotel Management",
@@ -9,7 +8,7 @@ export const metadata = {
 export default function DashboardLayout({ children }) {
   return (
     <div>
-      <DashboardLayoutClientWrapper>{children}</DashboardLayoutClientWrapper>
+      <DashboardLayoutClient>{children}</DashboardLayoutClient>
     </div>
   );
 }

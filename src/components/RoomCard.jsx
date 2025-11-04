@@ -15,8 +15,8 @@ export default function RoomCard({ room, view, onBook, onDetails }) {
                     <Image
                         src={room.img}
                         alt={room.name}
-                        layout="fill"
-                        objectFit="cover"
+                        fill
+                        style={{ objectFit: "cover" }}
                     />
                 ) : (
                     <FaBed className="text-blue-600 text-3xl" />

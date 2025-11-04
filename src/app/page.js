@@ -10,7 +10,7 @@ import {
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
 import LandingTopBar from "@/components/LandingTopBar";
-import AppModal from "@/components/ViewerModal";
+import ViewerModal from "@/components/ViewerModal";
 
 export default function Home() {
   return (

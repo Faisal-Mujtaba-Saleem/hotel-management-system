@@ -11,7 +11,7 @@ import {
 } from "@headlessui/react";
 import { Fragment } from "react";
 
-export default function AppModal() {
+export default function ViewerModal() {
   const { isOpen, setIsOpen, modalTitle, modalDescJSX } = useDialog();
 
   return (

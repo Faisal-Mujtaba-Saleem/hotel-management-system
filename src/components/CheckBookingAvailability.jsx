@@ -1,16 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { FaCalendarAlt, FaSearch } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { FaCalendarAlt, FaUsers, FaSearch } from "react-icons/fa";
 
 export const CheckBookingAvailability = () => {
   // Use Date objects for react-datepicker
   const [checkInDate, setCheckInDate] = useState(new Date());
   const [checkOutDate, setCheckOutDate] = useState(new Date());
-  const [guests, setGuests] = useState("1");
 
   const router = useRouter();
 
@@ -24,7 +23,6 @@ export const CheckBookingAvailability = () => {
     const queryParams = new URLSearchParams({
       checkInDate: checkInDate.toISOString().split("T")[0],
       checkOutDate: checkOutDate.toISOString().split("T")[0],
-      guests,
     }).toString();
 
     router.push(`/dashboard/available-rooms?${queryParams}`);
@@ -49,7 +47,7 @@ export const CheckBookingAvailability = () => {
     <>
       <div className="container mx-auto px-4 my-8 relative z-10">
         <div className="bg-white rounded-lg shadow-2xl p-6 md:p-8 max-w-4xl mx-auto relative z-[9999]">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Check In Date */}
             <div className="space-y-2 relative z-50">
               <label className="block text-sm font-medium text-gray-700">
@@ -79,22 +77,6 @@ export const CheckBookingAvailability = () => {
                 onChange={(date) => setCheckOutDate(date)}
                 minDate={checkInDate}
               />
-            </div>
-
-            {/* Guests Select */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Guests
-              </label>
-              <div className="relative">
-                <input
-                  className="w-full bg-gray-50 text-gray-900 rounded-md py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-teal-500 border border-gray-300 appearance-none"
-                  type="number"
-                  value={guests}
-                  onChange={(e) => setGuests(e.target.value)}
-                />
-                <FaUsers className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              </div>
             </div>
 
             {/* Check Availability Button */}

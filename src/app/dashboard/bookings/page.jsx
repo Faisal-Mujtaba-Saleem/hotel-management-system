@@ -24,7 +24,6 @@ export default function page() {
                   <TbCalendarUser className="text-2xl text-teal-600" />
                   <div>
                     <h3 className="text-md font-semibold text-gray-800">Check Booking Availability</h3>
-                    <p className="text-xs text-gray-500">Search by dates, guests and room type</p>
                   </div>
                 </div>
                 <ChevronUpIcon className={`w-5 h-5 text-gray-500 transform ${open ? "rotate-180" : "rotate-0"}`} />

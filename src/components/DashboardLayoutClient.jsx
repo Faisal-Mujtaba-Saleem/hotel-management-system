@@ -5,7 +5,7 @@ import DashboardTopBar from "./DashboardTopBar";
 import { DashboardSideBar } from "./DashboardSidebar";
 import { Transition } from "@headlessui/react";
 
-export default function DashboardLayoutClientWrapper(props) {
+export default function DashboardLayoutClient(props) {
   const { children } = props;
 
   const [showNav, setShowNav] = useState(true);
