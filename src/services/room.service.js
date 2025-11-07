@@ -104,4 +104,28 @@ export const RoomServices = {
       throw new ServerError(error.message || "Room search failed", 500);
     }
   },
+
+  async getBookedRoomsFromDB() {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // remove time part for accurate date comparison
+
+      // 🔍 Find all bookings that are current or future
+      const bookedRoomIds = await Booking.distinct("room", {
+        checkOut: { $gte: today },
+        status: { $ne: "Cancelled" },
+      });
+
+      // 🏨 Fetch room details of those bookings
+      const bookedRooms = await Room.find({ _id: { $in: bookedRoomIds } }).sort({
+        room_no: 1,
+      });
+
+      if (!bookedRooms.length)
+        throw new ServerError("No booked rooms found (current or future)", 404);
+    } catch (error) {
+      if (error instanceof ServerError) throw error;
+      throw new ServerError(error.message || "Failed to fetch booked rooms", 500);
+    }
+  }
 };

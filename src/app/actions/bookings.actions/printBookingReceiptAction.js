@@ -29,6 +29,7 @@ export async function printBookingReceipt(prevState, formData) {
 
     // 🧩 Step 4: Clean up temporary file
     if (fs.existsSync(pdfFilePath)) {
+      console.log("Deleting temporary PDF file:", pdfFilePath);
       fs.unlinkSync(pdfFilePath);
     }
 
@@ -41,7 +42,7 @@ export async function printBookingReceipt(prevState, formData) {
     };
 
   } catch (error) {
-    console.error("Error printing receipt:", error);
+    console.error("Error printing receipt:", error.message);
 
     return {
       success: false,
