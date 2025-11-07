@@ -8,15 +8,15 @@ import { IoEyeOutline } from "react-icons/io5";
 import { useElementsHeights } from "@/contexts/elements-heights-context/context";
 import { useDialog } from "@/contexts/modal-context/context";
 import { useRooms } from "@/contexts/rooms-context/context";
-import EditRoomModal from "./EditRoomModal";
+import EditRoomForm from "./EditRoomForm";
+import RoomView from "./RoomView";
 
 export default function RoomsTable() {
   const { rooms, loading, error, fetchRooms, deleteRoom } = useRooms();
   const { topbarHeight, headerHeight } = useElementsHeights();
   const { populateModal } = useDialog();
   
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedRoom, setSelectedRoom] = useState(null);
+  // Pagination state / config
 
   // Pagination state / config
   const [currentPage, setCurrentPage] = useState(1);
@@ -63,14 +63,9 @@ export default function RoomsTable() {
   }
 
   // Handle edit room
-  const handleEdit = (e, room) => {
+  const handleEdit = (e, selectedRoom) => {
     e.stopPropagation();
-    setSelectedRoom(room);
-    setIsEditModalOpen(true);
-  };
-
-  const handleRoomUpdate = (updatedRoom) => {
-    setRooms((prev) => prev.map((r) => (r._id === updatedRoom._id ? updatedRoom : r)));
+    populateModal("Edit Room", <EditRoomForm room={selectedRoom} />);
   };
 
   // Handle delete room
@@ -85,36 +80,10 @@ export default function RoomsTable() {
     }
   };
 
-  function handleViewDetails(selectedRoom) {
-    // prepare modal JSX and show
-    const imgSrc = selectedRoom.img || selectedRoom.image || "/placeholder.jpg";
-    const modalTitle = `Room — ${selectedRoom.name || selectedRoom.room_no || "#"}`;
-    const modalDesc = (
-      <div className="flex flex-col gap-3">
-        <div className="flex justify-center">
-          <Image src={imgSrc} alt="Room" width={360} height={220} className="rounded-lg object-cover" />
-        </div>
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <p className="font-medium text-gray-700">Room No:</p>
-          <p>{selectedRoom.room_no ?? "—"}</p>
-          <p className="font-medium text-gray-700">Name:</p>
-          <p>{selectedRoom.name ?? "—"}</p>
-          <p className="font-medium text-gray-700">Type:</p>
-          <p>{selectedRoom.roomType ?? "—"}</p>
-          <p className="font-medium text-gray-700">Price:</p>
-          <p>{selectedRoom.price ?? "—"}</p>
-          <p className="font-medium text-gray-700">Capacity:</p>
-          <p>{selectedRoom.capacity ?? "—"}</p>
-          <p className="font-medium text-gray-700">Status:</p>
-          <p>{selectedRoom.status ?? "—"}</p>
-          <p className="font-medium text-gray-700">Features:</p>
-          <p>{(selectedRoom.features || []).join(", ") || "—"}</p>
-        </div>
-      </div>
-    );
-
-    populateModal(modalTitle, modalDesc);
-  }
+  const handleViewDetails = (room) => {
+    const modalTitle = `Room — ${room.name || room.room_no || "#"}`;
+    populateModal(modalTitle, <RoomView room={room} />);
+  };
 
   return (
     <div className="overflow-x-auto bg-white pb-5 mx-6 rounded shadow-sm">
@@ -207,13 +176,7 @@ export default function RoomsTable() {
         </tbody>
       </table>
 
-      {/* Edit Room Modal */}
-      <EditRoomModal
-        isOpen={isEditModalOpen}
-        closeModal={() => setIsEditModalOpen(false)}
-        room={selectedRoom}
-        onUpdate={handleRoomUpdate}
-      />
+      {/* No need for Edit Modal here anymore as we're using global modal context */}
 
       {/* Pagination */}
       <div className="flex justify-end pr-6 pt-5 border-t border-gray-100">

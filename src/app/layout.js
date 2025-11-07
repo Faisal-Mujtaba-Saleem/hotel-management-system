@@ -4,7 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ElementsHeightsProvider } from "@/contexts/elements-heights-context/context";
 import ModalContextProvider from "@/contexts/modal-context/context";
 import RoomsContextProvider from "@/contexts/rooms-context/context";
-import ViewerModal from "@/components/ViewerModal";
+import AppModal from "@/components/AppModal";
 import ToastProvider from "./providers/ToastProvider";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -33,7 +33,7 @@ export default function RootLayout({ children }) {
           <ElementsHeightsProvider>
             <ModalContextProvider>
               <RoomsContextProvider>
-                <ViewerModal />
+                <AppModal />
                 <ToastProvider />
                 {children}
               </RoomsContextProvider>

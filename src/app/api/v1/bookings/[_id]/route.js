@@ -7,6 +7,7 @@ export async function GET(_, { params }) {
     const result = await BookingServices.getBookingByIdFromDB(params._id);
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
+    console.log(error);
     return NextResponse.json(
       { error: error.message },
       { status: error.statusCode || 500 }

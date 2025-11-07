@@ -6,15 +6,15 @@ import { FaEdit } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { useElementsHeights } from "@/contexts/elements-heights-context/context";
 import { useDialog } from "@/contexts/modal-context/context";
-import EditGuestModal from "./EditGuestModal";
+import EditGuestForm from "./EditGuestForm";
 import { toast } from "react-toastify";
+import GuestView from "./GuestView";
 
 export default function GuestsTable() {
   const [guests, setGuests] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedGuest, setSelectedGuest] = useState(null);
+  // Editing now handled via centralized AppModal
 
   const { topbarHeight, headerHeight } = useElementsHeights();
   const { populateModal } = useDialog();
@@ -75,11 +75,18 @@ export default function GuestsTable() {
     setCurrentPage(p);
   }
 
-  // Handle edit
+  // Handle edit — open EditGuestForm inside AppModal
   const handleEdit = (e, guest) => {
     e.stopPropagation();
-    setSelectedGuest(guest);
-    setIsEditModalOpen(true);
+    populateModal(
+      "Edit Guest",
+      <EditGuestForm
+        guest={guest}
+        onUpdate={() => {
+          handleGuestUpdate();
+        }}
+      />
+    );
   };
 
   const handleGuestUpdate = async () => {
@@ -116,39 +123,7 @@ export default function GuestsTable() {
   // Handle view modal
   const handleViewDetails = (guest) => {
     const modalTitle = `Guest — ${guest.fullName || "—"}`;
-    const modalDesc = (
-      <div className="flex flex-col gap-2 text-sm">
-        <div className="grid grid-cols-2 gap-2">
-          <p className="font-medium text-gray-700">Full Name:</p>
-          <p>{guest.fullName ?? "—"}</p>
-
-          <p className="font-medium text-gray-700">Contact Number:</p>
-          <p>{guest.contactNumber ?? "—"}</p>
-
-          <p className="font-medium text-gray-700">CNIC:</p>
-          <p>{guest.cnic ?? "—"}</p>
-
-          <p className="font-medium text-gray-700">Email:</p>
-          <p>{guest.email ?? "—"}</p>
-
-          <p className="font-medium text-gray-700">Gender:</p>
-          <p>{guest.gender ?? "—"}</p>
-
-          <p className="font-medium text-gray-700">Address:</p>
-          <p>{guest.address ?? "—"}</p>
-
-          <p className="font-medium text-gray-700">Primary Guest:</p>
-          <p>{guest.isPrimaryGuest ? "Yes" : "No"}</p>
-
-          <p className="font-medium text-gray-700">Created At:</p>
-          <p>
-            {guest.createdAt ? new Date(guest.createdAt).toLocaleString() : "—"}
-          </p>
-        </div>
-      </div>
-    );
-
-    populateModal(modalTitle, modalDesc);
+    populateModal(modalTitle, <GuestView guest={guest} />);
   };
 
   function initials(name) {
@@ -261,18 +236,7 @@ export default function GuestsTable() {
         </tbody>
       </table>
 
-      {/* Edit Guest Modal */}
-      {isEditModalOpen && selectedGuest && (
-        <EditGuestModal
-          isOpen={isEditModalOpen}
-          closeModal={() => setIsEditModalOpen(false)}
-          guest={selectedGuest}
-          onUpdate={() => {
-            handleGuestUpdate();
-            setIsEditModalOpen(false);
-          }}
-        />
-      )}
+      {/* Edit Guest now opens inside AppModal via populateModal */}
 
       {/* Pagination */}
       <div className="flex justify-end pr-6 pt-5 border-t border-gray-100">

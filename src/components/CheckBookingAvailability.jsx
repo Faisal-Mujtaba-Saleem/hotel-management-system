@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaCalendarAlt, FaSearch } from "react-icons/fa";
+import { toast } from "react-toastify";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -12,17 +13,17 @@ export const CheckBookingAvailability = () => {
   const [checkOutDate, setCheckOutDate] = useState(new Date());
 
   const router = useRouter();
-
+  
   function handleCheckAvailability() {
     if (!checkInDate || !checkOutDate) {
       // simple guard; adapt as needed
-      alert("Please select both check-in and check-out dates.");
+      toast.error("Please select both check-in and check-out dates.");
       return;
     }
 
     const queryParams = new URLSearchParams({
-      checkInDate: checkInDate.toISOString().split("T")[0],
-      checkOutDate: checkOutDate.toISOString().split("T")[0],
+      checkIn: checkInDate.toISOString().split("T")[0],
+      checkOut: checkOutDate.toISOString().split("T")[0],
     }).toString();
 
     router.push(`/dashboard/available-rooms?${queryParams}`);

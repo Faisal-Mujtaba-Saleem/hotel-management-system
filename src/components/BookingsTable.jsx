@@ -2,22 +2,21 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { ChevronUpIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { TrashIcon } from "@heroicons/react/24/outline";
 import { FaEdit } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { formatCurrency } from "@/utlis/formatCurrency";
 import { useElementsHeights } from "@/contexts/elements-heights-context/context";
 import { useDialog } from "@/contexts/modal-context/context";
-import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
-import EditBookingModal from "./EditBookingModal";
 import { toast } from "react-toastify";
+import BookingView from "./BookingView";
+import EditBookingForm from "./EditBookingForm";
 
 export default function BookingsTable() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState(null);
+  // edit modal handled via global AppModal using populateModal
 
   // Pagination state / config
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,11 +42,13 @@ export default function BookingsTable() {
       setError(null);
       try {
         const res = await fetch("/api/v1/bookings", { signal: ac.signal });
-        if (!res.ok) throw new Error(`Failed to fetch bookings (${res.status})`);
+        if (!res.ok)
+          throw new Error(`Failed to fetch bookings (${res.status})`);
         const data = await res.json();
         setBookings(Array.isArray(data) ? data : data?.data || []);
       } catch (err) {
-        if (err.name !== "AbortError") setError(err.message || "Failed to load bookings");
+        if (err.name !== "AbortError")
+          setError(err.message || "Failed to load bookings");
       } finally {
         setLoading(false);
       }
@@ -59,9 +60,8 @@ export default function BookingsTable() {
   }, []);
 
   useEffect(() => {
-    console.log(bookings)
-  }, [bookings])
-
+    console.log(bookings);
+  }, [bookings]);
 
   const totalPages = Math.max(1, Math.ceil(bookings.length / pageSize));
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -87,11 +87,13 @@ export default function BookingsTable() {
     setCurrentPage(p);
   }
 
-  // Handle edit booking
+  // Handle edit booking — open centralized AppModal with form
   const handleEdit = (e, booking) => {
     e.stopPropagation();
-    setSelectedBooking(booking);
-    setIsEditModalOpen(true);
+    populateModal(
+      "Edit Booking",
+      <EditBookingForm booking={booking} onUpdate={handleBookingUpdate} />
+    );
   };
 
   // Handle booking update
@@ -106,7 +108,7 @@ export default function BookingsTable() {
   // Handle delete booking
   const handleDelete = async (e, bookingId) => {
     e.stopPropagation();
-    
+
     if (!window.confirm("Are you sure you want to delete this booking?")) {
       return;
     }
@@ -128,146 +130,12 @@ export default function BookingsTable() {
   function handleViewDetails(e, selectedBooking) {
     e.stopPropagation();
 
-    // Prepare data
-    const imgSrc = selectedBooking.room?.img || selectedBooking.room?.image || "/placeholder.jpg";
-    const roomNo = selectedBooking.room?.room_no || "—";
-    const bookingId = selectedBooking._id || "—";
-    const guest = selectedBooking.guests?.[0];
-    const email = guest?.email || guest?.contactNumber || "—";
-    const startDate = selectedBooking.checkIn
-      ? new Date(selectedBooking.checkIn).toLocaleString()
-      : "—";
-    const endDate = selectedBooking.checkOut
-      ? new Date(selectedBooking.checkOut).toLocaleString()
-      : "—";
-    const price = formatCurrency(selectedBooking.totalAmount ?? 0);
-
-    const modalTitle = `Booking Details — ${bookingId}`;
-
-    // 🧩 Collapsible Content (Headless UI)
-    const modalDescriptionJSX = (
-      <div className="flex flex-col gap-3">
-        {/* Booking overview image */}
-        <div className="flex justify-center">
-          <Image
-            src={imgSrc}
-            alt="Room Image"
-            width={300}
-            height={180}
-            className="rounded-lg object-cover"
-          />
-        </div>
-
-        {/* Booking summary */}
-        <div className="grid grid-cols-2 gap-2 text-sm mt-2">
-          <p className="font-medium text-gray-700">Room No:</p>
-          <p>{roomNo}</p>
-
-          <p className="font-medium text-gray-700">Booking ID:</p>
-          <p>{bookingId}</p>
-
-          <p className="font-medium text-gray-700">Guest Contact:</p>
-          <p>{email}</p>
-
-          <p className="font-medium text-gray-700">Check-In:</p>
-          <p>{startDate}</p>
-
-          <p className="font-medium text-gray-700">Check-Out:</p>
-          <p>{endDate}</p>
-
-          <p className="font-medium text-gray-700">Total Price:</p>
-          <p>{price}</p>
-        </div>
-
-        {/* -------- Collapsible Sections -------- */}
-        <div className="mt-4 space-y-2">
-          {/* ROOM DETAILS */}
-          <Disclosure>
-            {({ open }) => (
-              <div className="border rounded-lg">
-                <Disclosure.Button className="flex justify-between w-full px-4 py-2 text-sm font-semibold text-left bg-gray-100 rounded-t-lg hover:bg-gray-200">
-                  <span>Room Details</span>
-                  <ChevronUpIcon
-                    className={`h-5 w-5 transform transition-transform duration-300 ${open ? "rotate-180" : ""
-                      }`}
-                  />
-                </Disclosure.Button>
-                <Disclosure.Panel className="px-4 py-3 text-sm text-gray-700 bg-white rounded-b-lg">
-                  {selectedBooking.room ? (
-                    <ul className="space-y-1">
-                      <li>
-                        <strong>Type:</strong> {selectedBooking.room.roomType}
-                      </li>
-                      <li>
-                        <strong>Price:</strong>{" "}
-                        {formatCurrency(selectedBooking.room.price)}
-                      </li>
-                      <li>
-                        <strong>Capacity:</strong> {selectedBooking.room.capacity}
-                      </li>
-                      <li>
-                        <strong>Status:</strong> {selectedBooking.room.status}
-                      </li>
-                      <li>
-                        <strong>Features:</strong>{" "}
-                        {selectedBooking.room.features?.join(", ") || "—"}
-                      </li>
-                    </ul>
-                  ) : (
-                    <p>No room details available.</p>
-                  )}
-                </Disclosure.Panel>
-              </div>
-            )}
-          </Disclosure>
-
-          {/* GUESTS DETAILS */}
-          <Disclosure>
-            {({ open }) => (
-              <div className="border rounded-lg">
-                <DisclosureButton className="flex justify-between w-full px-4 py-2 text-sm font-semibold text-left bg-gray-100 rounded-t-lg hover:bg-gray-200">
-                  <span>Guest(s) Details</span>
-                  <ChevronUpIcon
-                    className={`h-5 w-5 transform transition-transform duration-300 ${open ? "rotate-180" : ""
-                      }`}
-                  />
-                </DisclosureButton>
-                <DisclosurePanel className="px-4 py-3 text-sm text-gray-700 bg-white rounded-b-lg">
-                  {selectedBooking.guests?.length ? (
-                    <div className="space-y-2">
-                      {selectedBooking.guests.map((g, i) => (
-                        <div key={g._id || i} className="border-b pb-2">
-                          <p>
-                            <strong>Name:</strong> {g.fullName || "—"}
-                          </p>
-                          <p>
-                            <strong>Email:</strong> {g.email || "—"}
-                          </p>
-                          <p>
-                            <strong>Contact:</strong> {g.contactNumber || "—"}
-                          </p>
-                          <p>
-                            <strong>CNIC:</strong> {g.cnic || "—"}
-                          </p>
-                          <p>
-                            <strong>Primary Guest:</strong>{" "}
-                            {g.isPrimaryGuest ? "Yes" : "No"}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p>No guests found.</p>
-                  )}
-                </DisclosurePanel>
-              </div>
-            )}
-          </Disclosure>
-        </div>
-      </div>
+    const modalTitle = `Booking Details — ${selectedBooking._id}`;
+    
+    populateModal(
+      modalTitle,
+      <BookingView viewBooking={selectedBooking} />
     );
-
-    populateModal(modalTitle, modalDescriptionJSX);
   }
 
   return (
@@ -291,7 +159,10 @@ export default function BookingsTable() {
         <tbody>
           {loading ? (
             <tr>
-              <td colSpan={11} className="p-4 text-center text-sm text-gray-500">
+              <td
+                colSpan={11}
+                className="p-4 text-center text-sm text-gray-500"
+              >
                 Loading bookings...
               </td>
             </tr>
@@ -303,25 +174,44 @@ export default function BookingsTable() {
             </tr>
           ) : visibleBookings.length === 0 ? (
             <tr>
-              <td colSpan={11} className="p-4 text-center text-sm text-gray-500">
+              <td
+                colSpan={11}
+                className="p-4 text-center text-sm text-gray-500"
+              >
                 No bookings found
               </td>
             </tr>
           ) : (
             visibleBookings.map((booking, index) => {
-              const imgSrc = booking.room?.img || booking.room?.image || booking.room?.img_url || "/placeholder.jpg";
+              const imgSrc =
+                booking.room?.img ||
+                booking.room?.image ||
+                booking.room?.img_url ||
+                "/placeholder.jpg";
               const roomNo = booking.room?.room_no || "—";
-              const bookingId = booking._id || booking.bookingId || `BK${index}`;
-              const email = booking.guests?.[0]?.email || booking.guests?.[0]?.contactNumber || "—";
-              const startDate = booking.checkIn ? new Date(booking.checkIn).toLocaleDateString() : "—";
-              const endDate = booking.checkOut ? new Date(booking.checkOut).toLocaleDateString() : "—";
+              const bookingId =
+                booking._id || booking.bookingId || `BK${index}`;
+              const email =
+                booking.guests?.[0]?.email ||
+                booking.guests?.[0]?.contactNumber ||
+                "—";
+              const startDate = booking.checkIn
+                ? new Date(booking.checkIn).toLocaleDateString()
+                : "—";
+              const endDate = booking.checkOut
+                ? new Date(booking.checkOut).toLocaleDateString()
+                : "—";
               const total = formatCurrency(booking.totalAmount ?? 0);
               const paid = formatCurrency(booking.paidAmount ?? 0);
               const paymentStatus = booking.paymentStatus || "Pending";
               const bookingStatus = booking.status || "Pending";
 
               return (
-                <tr ref={tr_Ref} key={bookingId} className="hover border-b border-gray-300">
+                <tr
+                  ref={tr_Ref}
+                  key={bookingId}
+                  className="hover border-b border-gray-300"
+                >
                   <td className="p-2">
                     <Image
                       className="w-20 h-[45px] rounded object-cover"
@@ -339,26 +229,30 @@ export default function BookingsTable() {
                   <td className="p-3">{total}</td>
                   <td className="p-3">{paid}</td>
                   <td className="p-3">
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      paymentStatus === "Paid" 
-                        ? "bg-green-100 text-green-800"
-                        : paymentStatus === "Cancelled"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs ${
+                        paymentStatus === "Paid"
+                          ? "bg-green-100 text-green-800"
+                          : paymentStatus === "Cancelled"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
                       {paymentStatus}
                     </span>
                   </td>
                   <td className="p-3">
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      bookingStatus === "Checked-Out"
-                        ? "bg-green-100 text-green-800"
-                        : bookingStatus === "Checked-In"
-                        ? "bg-blue-100 text-blue-800"
-                        : bookingStatus === "Cancelled"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs ${
+                        bookingStatus === "Checked-Out"
+                          ? "bg-green-100 text-green-800"
+                          : bookingStatus === "Checked-In"
+                          ? "bg-blue-100 text-blue-800"
+                          : bookingStatus === "Cancelled"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
                       {bookingStatus}
                     </span>
                   </td>
@@ -370,14 +264,14 @@ export default function BookingsTable() {
                     >
                       <IoEyeOutline size={18} />
                     </button>
-                    <button 
+                    <button
                       className="hover:bg-green-500 flex justify-center p-1 rounded mx-auto"
                       onClick={(e) => handleEdit(e, booking)}
                       title="Edit Booking"
                     >
                       <FaEdit className="w-5 h-5 text-green-500 hover:text-gray-100" />
                     </button>
-                    <button 
+                    <button
                       className="hover:text-red-100 hover:bg-red-500 flex justify-center p-1 rounded mx-auto"
                       onClick={(e) => handleDelete(e, booking._id)}
                       title="Delete Booking"
@@ -392,21 +286,16 @@ export default function BookingsTable() {
         </tbody>
       </table>
 
-      {/* Edit Modal */}
-      <EditBookingModal
-        isOpen={isEditModalOpen}
-        closeModal={() => setIsEditModalOpen(false)}
-        booking={selectedBooking}
-        onUpdate={handleBookingUpdate}
-      />
+      {/* Edit Booking now opens inside AppModal via populateModal */}
 
       {/* Pagination */}
       <div className="flex justify-end pr-6 pt-5 border-t border-gray-100">
         <ul className="flex items-center gap-1 text-sm">
           <li>
             <button
-              className={`px-3 py-[5px] border border-gray-100 rounded bg-[#0284c7] text-white ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+              className={`px-3 py-[5px] border border-gray-100 rounded bg-[#0284c7] text-white ${
+                currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+              }`}
               onClick={() => goToPage(currentPage - 1)}
               disabled={currentPage === 1}
             >
@@ -418,10 +307,11 @@ export default function BookingsTable() {
             <li key={page}>
               <button
                 onClick={() => goToPage(page)}
-                className={`px-3 py-[5px] border border-gray-100 rounded ${page === currentPage
-                  ? "bg-[#0284c7] text-white"
-                  : "hover:bg-gray-100 transition"
-                  }`}
+                className={`px-3 py-[5px] border border-gray-100 rounded ${
+                  page === currentPage
+                    ? "bg-[#0284c7] text-white"
+                    : "hover:bg-gray-100 transition"
+                }`}
               >
                 {page}
               </button>
@@ -430,10 +320,11 @@ export default function BookingsTable() {
 
           <li>
             <button
-              className={`px-3 py-[5px] border border-gray-100 rounded bg-[#0284c7] text-white ${currentPage === totalPages
-                ? "opacity-50 cursor-not-allowed"
-                : ""
-                }`}
+              className={`px-3 py-[5px] border border-gray-100 rounded bg-[#0284c7] text-white ${
+                currentPage === totalPages
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
+              }`}
               onClick={() => goToPage(currentPage + 1)}
               disabled={currentPage === totalPages}
             >
@@ -445,3 +336,5 @@ export default function BookingsTable() {
     </div>
   );
 }
+
+

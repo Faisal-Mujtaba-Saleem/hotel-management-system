@@ -6,7 +6,7 @@ import RoomsTable from "@/components/RoomsTable";
 import { SiHomebridge } from "react-icons/si";
 import { IoAdd } from "react-icons/io5";
 import { useDialog } from "@/contexts/modal-context/context";
-import AddRoomForm from "@/components/AddRoomModal";
+import AddRoomForm from "@/components/AddRoomForm";
 
 const AddBtn = () => {
   const { populateModal } = useDialog();

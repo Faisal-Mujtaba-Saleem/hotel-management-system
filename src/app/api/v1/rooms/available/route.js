@@ -7,8 +7,8 @@ import { ServerError } from "@/utlis/ServerError";
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const startDate = searchParams.get("start");
-    const endDate = searchParams.get("end");
+    const startDate = searchParams.get("checkIn");
+    const endDate = searchParams.get("checkOut");
 
     if (!startDate || !endDate)
       throw new ServerError("Both start and end dates are required", 400);

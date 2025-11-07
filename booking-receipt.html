@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Booking Receipt</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+  <div class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white shadow-md rounded-lg p-6 w-full max-w-[700px] text-sm">
+      <!-- Header -->
+      <div class="text-center border-b pb-3 mb-4">
+        <h2 class="text-xl font-semibold text-gray-800">
+          Hotel Booking Receipt
+        </h2>
+        <p class="text-xs text-gray-500">
+          Booking ID: BKG-10523 | Issued: 2025-11-05 12:30 PM
+        </p>
+      </div>
+
+      <!-- Room Info -->
+      <div class="flex gap-4 mb-4 border-b pb-3">
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400" alt="Room"
+          class="w-[120px] h-[90px] object-cover rounded-md border" />
+        <div>
+          <p class="font-semibold text-gray-800">Room No: 203</p>
+          <p>Room Name: Ocean View Deluxe</p>
+          <p>Type: Deluxe</p>
+          <p>Capacity: 2 Guests</p>
+        </div>
+      </div>
+
+      <!-- Primary Guest -->
+      <div class="mb-4">
+        <h3 class="font-semibold text-gray-800 border-b mb-2 pb-1 uppercase text-xs tracking-wide">
+          Primary Guest
+        </h3>
+        <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+          <p class="font-medium text-gray-700">Full Name:</p>
+          <p>Faisal Saleem</p>
+
+          <p class="font-medium text-gray-700">CNIC:</p>
+          <p>12345-0123456-7</p>
+
+          <p class="font-medium text-gray-700">Contact:</p>
+          <p>0300-1234567</p>
+
+          <p class="font-medium text-gray-700">Email:</p>
+          <p>faisal@example.com</p>
+
+          <p class="font-medium text-gray-700">Gender:</p>
+          <p>Male</p>
+
+          <p class="font-medium text-gray-700">Address:</p>
+          <p>Gulshan-e-Iqbal, Karachi</p>
+        </div>
+      </div>
+
+      <!-- Other Guests -->
+      <div class="mb-4">
+        <h3 class="font-semibold text-gray-800 border-b mb-2 pb-1 uppercase text-xs tracking-wide">
+          Other Guests
+        </h3>
+
+        <ul class="list-disc list-inside text-gray-700 space-y-1 ml-1">
+          <li>Ahmed Raza – Male – CNIC: 12345-9876543-2</li>
+          <li>Ali Khan – Male – CNIC: 67890-0123456-9</li>
+        </ul>
+      </div>
+
+      <!-- Booking Details -->
+      <div class="mb-4">
+        <h3 class="font-semibold text-gray-800 border-b mb-2 pb-1 uppercase text-xs tracking-wide">
+          Booking Details
+        </h3>
+
+        <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+          <p class="font-medium text-gray-700">Check-In:</p>
+          <p>2025-11-10 2:00 PM</p>
+
+          <p class="font-medium text-gray-700">Check-Out:</p>
+          <p>2025-11-13 11:00 AM</p>
+
+          <p class="font-medium text-gray-700">Status:</p>
+          <p>Checked-In</p>
+        </div>
+      </div>
+
+      <!-- Payment Info -->
+      <div class="mb-5">
+        <h3 class="font-semibold text-gray-800 border-b mb-2 pb-1 uppercase text-xs tracking-wide">
+          Payment Summary
+        </h3>
+
+        <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+          <p class="font-medium text-gray-700">Total Amount:</p>
+          <p>PKR 45,000</p>
+
+          <p class="font-medium text-gray-700">Paid Amount:</p>
+          <p>PKR 30,000</p>
+
+          <p class="font-medium text-gray-700">Remaining Balance:</p>
+          <p class="text-red-600">PKR 15,000</p>
+
+          <p class="font-medium text-gray-700">Payment Status:</p>
+          <p>
+            <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">Pending</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center text-xs text-gray-500 border-t pt-3">
+        <p>Thank you for choosing our hotel!</p>
+        <p class="mt-1">We hope you enjoy your stay.</p>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

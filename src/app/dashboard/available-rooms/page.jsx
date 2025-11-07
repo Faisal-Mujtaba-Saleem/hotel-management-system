@@ -13,7 +13,7 @@ import { useSearchParams } from "next/navigation";
 import { formatCurrency } from "@/utlis/formatCurrency";
 import { useDialog } from "@/contexts/modal-context/context";
 import RoomCard from "@/components/RoomCard";
-import { BookingModal } from "@/components/BookingModal";
+import BookingForm from "@/components/BookingForm";
 import calculateNights from "@/utlis/calculateNights";
 
 /* ---------- Main Page ---------- */
@@ -23,8 +23,7 @@ export default function Page() {
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("All");
   const [sortBy, setSortBy] = useState("recommended");
-  const [selected, setSelected] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  // selected/showModal removed — booking now opens in AppModal via populateModal
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [guestRange, setGuestRange] = useState({ min: "", max: "" });
@@ -44,10 +43,10 @@ export default function Page() {
   useEffect(() => {
     if (!searchParams) return;
 
-    const checkInDate = searchParams.get("checkInDate");
+    const checkInDate = searchParams.get("checkIn");
     if (checkInDate) setCheckIn(checkInDate);
 
-    const checkOutDate = searchParams.get("checkOutDate");
+    const checkOutDate = searchParams.get("checkOut");
     if (checkOutDate) setCheckOut(checkOutDate);
   }, [searchParams]);
 
@@ -58,15 +57,13 @@ export default function Page() {
       setError(null);
       try {
         const params = new URLSearchParams();
-        if (checkIn) params.append("checkInDate", checkIn);
-        if (checkOut) params.append("checkOutDate", checkOut);
+        if (checkIn) params.append("checkIn", checkIn);
+        if (checkOut) params.append("checkOut", checkOut);
 
-        const res = await fetch(
-          `/api/v1/rooms/available?${params.toString()}`
-        );
+        const res = await fetch(`/api/v1/rooms/available?${params.toString()}`);
         if (!res.ok) throw new Error(`Server returned ${res.status}`);
-        const body = await res.json();
-        const data = (body.data || []).map((r) => ({
+        const data = await res.json();
+        const fetchedRooms = (data || []).map((r) => ({
           id: r._id || r.room_id || r.id,
           room_no: r.room_no || r.roomNo || r.roomNumber || r.room_id || r._id,
           name: r.name,
@@ -79,7 +76,7 @@ export default function Page() {
           status: r.status,
           bookings: r.bookings || [],
         }));
-        setRooms(data);
+        setRooms(fetchedRooms);
       } catch (err) {
         setError(err.message || "Failed to fetch rooms");
       } finally {
@@ -87,17 +84,26 @@ export default function Page() {
       }
     };
 
-    fetchRooms();
+    if (checkIn && checkOut) {
+      fetchRooms();
+    }
   }, [checkIn, checkOut, refreshKey]);
 
   const handleBook = (room) => {
-    setSelected(room);
-    setShowModal(true);
+    const title = `Book – ${room.name || room.room_no || "Room"}`;
+    const jsx = (
+      <BookingForm
+        room={room}
+        bookingParams={{ checkIn, checkOut }}
+        refresher={() => setRefreshKey((prev) => prev + 1)}
+      />
+    );
+    populateModal(title, jsx);
   };
 
   function handleViewDetails(selectedRoom) {
     const modalTitle = `Room Details - ${selectedRoom.name || "Unnamed room"}`;
-    // Try to read checkIn/checkOut from URL search params to calculate total
+    // Try to read checkInDate/checkOut from URL search params to calculate total
     const nights = useMemo(
       () => calculateNights(checkIn, checkOut),
       [checkIn, checkOut]
@@ -324,7 +330,9 @@ export default function Page() {
               min="1"
               placeholder="Min"
               value={guestRange.min}
-              onChange={(e) => setGuestRange(prev => ({ ...prev, min: e.target.value }))}
+              onChange={(e) =>
+                setGuestRange((prev) => ({ ...prev, min: e.target.value }))
+              }
               className="w-16 bg-transparent outline-none text-sm text-gray-700 border-b border-gray-200 focus:border-blue-500"
             />
             <span className="text-gray-400">-</span>
@@ -333,7 +341,9 @@ export default function Page() {
               min="1"
               placeholder="Max"
               value={guestRange.max}
-              onChange={(e) => setGuestRange(prev => ({ ...prev, max: e.target.value }))}
+              onChange={(e) =>
+                setGuestRange((prev) => ({ ...prev, max: e.target.value }))
+              }
               className="w-16 bg-transparent outline-none text-sm text-gray-700 border-b border-gray-200 focus:border-blue-500"
             />
           </div>
@@ -389,13 +399,7 @@ export default function Page() {
         )}
       </section>
 
-      <BookingModal
-        open={showModal}
-        room={selected}
-        onClose={() => setShowModal(false)}
-        bookingParams={{ checkIn, checkOut }}
-        refresher={() => setRefreshKey((prev) => prev + 1)}
-      />
+      {/* Booking now opens inside AppModal via populateModal (BookingForm) */}
     </main>
   );
 }

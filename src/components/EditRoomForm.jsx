@@ -1,10 +1,13 @@
 "use client";
 
-import { Dialog } from "@headlessui/react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDialog } from "@/contexts/modal-context/context";
+import { useRooms } from "@/contexts/rooms-context/context";
 import { toast } from "react-toastify";
 
-export default function EditRoomModal({ isOpen, closeModal, room, onUpdate }) {
+export default function EditRoomForm({ room }) {
+  const { setIsOpen } = useDialog();
+  const { updateRoom } = useRooms();
   const [formData, setFormData] = useState({
     name: "",
     room_no: "",
@@ -69,10 +72,11 @@ export default function EditRoomModal({ isOpen, closeModal, room, onUpdate }) {
       const updated = json.room || json || null;
       if (!updated) throw new Error("No updated room returned from server");
 
-      onUpdate(updated);
+      updateRoom(updated);
       toast.success("Room updated successfully");
-      closeModal();
+      setIsOpen(false);
     } catch (err) {
+      console.error(err);
       toast.error(err.message || "Failed to update room");
     } finally {
       setLoading(false);
@@ -80,12 +84,9 @@ export default function EditRoomModal({ isOpen, closeModal, room, onUpdate }) {
   };
 
   return (
-    <Dialog open={isOpen} onClose={closeModal} className="relative z-50">
-      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="mx-auto max-w-2xl w-full bg-white rounded-xl shadow-lg">
-          <div className="p-6">
-            <Dialog.Title className="text-lg font-semibold">Edit Room</Dialog.Title>
+    <div className="max-w-2xl mx-auto">
+      <div className="p-6">
+        <h2 className="text-lg font-semibold mb-4">Edit Room</h2>
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -188,10 +189,10 @@ export default function EditRoomModal({ isOpen, closeModal, room, onUpdate }) {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t">
+              AppModal<div className="flex justify-end gap-3 pt-4">
                 <button
                   type="button"
-                  onClick={closeModal}
+                  onClick={() => setIsOpen(false)}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
                 >
                   Cancel
@@ -206,8 +207,6 @@ export default function EditRoomModal({ isOpen, closeModal, room, onUpdate }) {
               </div>
             </form>
           </div>
-        </Dialog.Panel>
-      </div>
-    </Dialog>
+    </div>
   );
 }

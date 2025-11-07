@@ -7,7 +7,6 @@ import { SiHomebridge } from "react-icons/si";
 import { FaRegCalendarCheck, FaUserShield } from "react-icons/fa6";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import Loading from "./Loading";
 
 export const DashboardSideBar = forwardRef((props, ref) => {
   const [mounted, setMounted] = useState(false);
@@ -42,18 +41,19 @@ export const DashboardSideBar = forwardRef((props, ref) => {
           <UserCircleIcon className="w-20 h-auto rounded-full ring-4 ring-offset-4 text-white" />
         )}
       </div>
-      <p className="text-white mt-[-40px] font-bold text-xl text-center mb-4 rounded-full w-48  mx-auto">
+      <p className="text-white -mt-10 font-bold text-xl text-center mb-4 rounded-full w-48  mx-auto">
         {user && user.fullName}
       </p>
       {/* Sidebar Menu */}
       <div className="flex flex-col py-2">
         <Link href="/dashboard">
           <div
-            className={`pl-6 py-3 mx-5 rounded text-center cursor-pointer mb-3 flex items-center transition-colors
-                    ${router.pathname === "/dashboard"
+            className={`pl-6 py-3 mx-5 rounded text-center cursor-pointer mb-3 flex items-center transition-colors ${
+              typeof window !== "undefined" &&
+              window.location.pathname === "/dashboard"
                 ? "bg-[#ea3d5a] text-white rounded-r-full"
                 : "text-white hover:bg-[#ea3d5a] hover:text-white rounded-r-full"
-              }`}
+            }`}
           >
             <div className="mr-2">
               <HomeIcon className="w-5 h-5" />
@@ -63,11 +63,12 @@ export const DashboardSideBar = forwardRef((props, ref) => {
         </Link>
         <Link href="/dashboard/bookings">
           <div
-            className={`pl-6 py-3 mx-5 rounded text-center cursor-pointer mb-3 flex items-center transition-colors
-                    ${router.pathname === "/dashboard/bookings"
+            className={`pl-6 py-3 mx-5 rounded text-center cursor-pointer mb-3 flex items-center transition-colors ${
+              typeof window !== "undefined" &&
+              window.location.pathname === "/dashboard/bookings"
                 ? "bg-[#ea3d5a] text-white rounded-r-full"
                 : "text-white hover:bg-[#ea3d5a] hover:text-white rounded-r-full"
-              }`}
+            }`}
           >
             <div className="mr-2">
               {/* <TbHomeBolt className='w-5 h-5' /> */}
@@ -79,11 +80,12 @@ export const DashboardSideBar = forwardRef((props, ref) => {
 
         <Link href="/dashboard/rooms">
           <div
-            className={`pl-6 py-3 mx-5 rounded text-center cursor-pointer mb-3 flex items-center transition-colors
-                    ${router.pathname === "/dashboard/rooms"
+            className={`pl-6 py-3 mx-5 rounded text-center cursor-pointer mb-3 flex items-center transition-colors ${
+              typeof window !== "undefined" &&
+              window.location.pathname === "/dashboard/rooms"
                 ? "bg-[#ea3d5a] text-white rounded-r-full"
                 : "text-white hover:bg-[#ea3d5a] hover:text-white rounded-r-full"
-              }`}
+            }`}
           >
             <div className="mr-2">
               <SiHomebridge className="w-5 h-5" />
@@ -93,11 +95,12 @@ export const DashboardSideBar = forwardRef((props, ref) => {
         </Link>
         <Link href="/dashboard/guests">
           <div
-            className={`pl-6 py-3 mx-5 rounded text-center cursor-pointer mb-3 flex items-center transition-colors
-                    ${router.pathname === "/dashboard/users"
+            className={`pl-6 py-3 mx-5 rounded text-center cursor-pointer mb-3 flex items-center transition-colors ${
+              typeof window !== "undefined" &&
+              window.location.pathname === "/dashboard/users"
                 ? "bg-[#ea3d5a] text-white rounded-r-full"
                 : "text-white hover:bg-[#ea3d5a] hover:text-white rounded-r-full"
-              }`}
+            }`}
           >
             <div className="mr-2">
               <FaUserShield className="w-5 h-5" />

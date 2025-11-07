@@ -14,7 +14,6 @@ const bookingSchema = new mongoose.Schema(
 
     totalAmount: { type: Number, required: true },
     paidAmount: { type: Number, default: 0 },
-    paidAmount: { type: Number, required: true },
 
     paymentStatus: {
       type: String,
