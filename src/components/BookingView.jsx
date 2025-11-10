@@ -9,7 +9,7 @@ import {
 } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/24/outline";
 import { formatCurrency } from "@/utlis/formatCurrency";
-import getFormattedDateTime from "@/utlis/getFormattedDateTime";
+import getFormattedDateTime from "@/utlis/date-time-utils/getFormattedDateTime";
 import { renderToStaticMarkup } from "react-dom/server";
 import { printBookingReceipt } from "@/app/actions/bookings.actions/printBookingReceiptAction";
 import { toast } from "react-toastify";

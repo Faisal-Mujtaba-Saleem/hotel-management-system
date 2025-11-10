@@ -123,6 +123,8 @@ export const RoomServices = {
 
       if (!bookedRooms.length)
         throw new ServerError("No booked rooms found (current or future)", 404);
+
+      return bookedRooms;
     } catch (error) {
       if (error instanceof ServerError) throw error;
       throw new ServerError(error.message || "Failed to fetch booked rooms", 500);

@@ -6,7 +6,7 @@ import { HomeIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 import { SiHomebridge } from "react-icons/si";
 import { FaRegCalendarCheck, FaUserShield } from "react-icons/fa6";
 import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export const DashboardSideBar = forwardRef((props, ref) => {
   const [mounted, setMounted] = useState(false);
@@ -15,7 +15,7 @@ export const DashboardSideBar = forwardRef((props, ref) => {
 
   useEffect(() => setMounted(true), []);
 
-  const router = useRouter();
+  const pathname = usePathname();
 
   // 2️⃣ If not mounted or Clerk not ready, render a static placeholder
   if (!mounted || !isLoaded) {
@@ -48,12 +48,11 @@ export const DashboardSideBar = forwardRef((props, ref) => {
       <div className="flex flex-col py-2">
         <Link href="/dashboard">
           <div
-            className={`pl-6 py-3 mx-5 rounded text-center cursor-pointer mb-3 flex items-center transition-colors ${
-              typeof window !== "undefined" &&
-              window.location.pathname === "/dashboard"
+            className={`pl-6 py-3 mx-5 rounded text-center cursor-pointer mb-3 flex items-center transition-colors ${typeof window !== "undefined" &&
+                pathname === "/dashboard"
                 ? "bg-[#ea3d5a] text-white rounded-r-full"
                 : "text-white hover:bg-[#ea3d5a] hover:text-white rounded-r-full"
-            }`}
+              }`}
           >
             <div className="mr-2">
               <HomeIcon className="w-5 h-5" />
@@ -63,12 +62,11 @@ export const DashboardSideBar = forwardRef((props, ref) => {
         </Link>
         <Link href="/dashboard/bookings">
           <div
-            className={`pl-6 py-3 mx-5 rounded text-center cursor-pointer mb-3 flex items-center transition-colors ${
-              typeof window !== "undefined" &&
-              window.location.pathname === "/dashboard/bookings"
+            className={`pl-6 py-3 mx-5 rounded text-center cursor-pointer mb-3 flex items-center transition-colors ${typeof window !== "undefined" &&
+                pathname === "/dashboard/bookings"
                 ? "bg-[#ea3d5a] text-white rounded-r-full"
                 : "text-white hover:bg-[#ea3d5a] hover:text-white rounded-r-full"
-            }`}
+              }`}
           >
             <div className="mr-2">
               {/* <TbHomeBolt className='w-5 h-5' /> */}
@@ -80,12 +78,11 @@ export const DashboardSideBar = forwardRef((props, ref) => {
 
         <Link href="/dashboard/rooms">
           <div
-            className={`pl-6 py-3 mx-5 rounded text-center cursor-pointer mb-3 flex items-center transition-colors ${
-              typeof window !== "undefined" &&
-              window.location.pathname === "/dashboard/rooms"
+            className={`pl-6 py-3 mx-5 rounded text-center cursor-pointer mb-3 flex items-center transition-colors ${typeof window !== "undefined" &&
+                pathname === "/dashboard/rooms"
                 ? "bg-[#ea3d5a] text-white rounded-r-full"
                 : "text-white hover:bg-[#ea3d5a] hover:text-white rounded-r-full"
-            }`}
+              }`}
           >
             <div className="mr-2">
               <SiHomebridge className="w-5 h-5" />
@@ -95,12 +92,11 @@ export const DashboardSideBar = forwardRef((props, ref) => {
         </Link>
         <Link href="/dashboard/guests">
           <div
-            className={`pl-6 py-3 mx-5 rounded text-center cursor-pointer mb-3 flex items-center transition-colors ${
-              typeof window !== "undefined" &&
-              window.location.pathname === "/dashboard/users"
+            className={`pl-6 py-3 mx-5 rounded text-center cursor-pointer mb-3 flex items-center transition-colors ${typeof window !== "undefined" &&
+                pathname === "/dashboard/guests"
                 ? "bg-[#ea3d5a] text-white rounded-r-full"
                 : "text-white hover:bg-[#ea3d5a] hover:text-white rounded-r-full"
-            }`}
+              }`}
           >
             <div className="mr-2">
               <FaUserShield className="w-5 h-5" />

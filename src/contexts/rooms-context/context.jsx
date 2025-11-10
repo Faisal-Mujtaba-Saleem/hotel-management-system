@@ -11,19 +11,25 @@ export default function RoomsContextProvider({ children }) {
   const [error, setError] = useState(null);
 
   // Fetch rooms from API
-  const fetchRooms = async (signal) => {
+  const fetchRooms = async () => {
+    const controller = new AbortController();
+    const { signal } = controller;
     setLoading(true);
     setError(null);
+
     try {
       const res = await fetch("/api/v1/rooms", { signal });
-      if (!res.ok) throw new Error(`Failed to fetch rooms (${res.status})`);
+      if (!res.ok && !res.status === 404)
+        throw new Error(`Failed to fetch rooms (${res.status})`);
       const data = await res.json();
       setRooms(Array.isArray(data) ? data : data?.data || []);
     } catch (err) {
-      setError(err.message || "Failed to load rooms");
+      if (err.name !== "AbortError") setError(err.message || "Failed to load rooms");
     } finally {
       setLoading(false);
     }
+
+    return () => controller.abort(); // optional cleanup
   };
 
   // Add new room

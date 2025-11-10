@@ -32,7 +32,8 @@ export default function GuestsTable() {
       setError(null);
       try {
         const res = await fetch("/api/v1/guests", { signal: ac.signal });
-        if (!res.ok) throw new Error(`Failed to fetch guests (${res.status})`);
+        if (!res.ok && !res.status === 404)
+          throw new Error(`Failed to fetch guests (${res.status})`);
         const data = await res.json();
         setGuests(Array.isArray(data) ? data : data?.data || []);
       } catch (err) {
@@ -195,11 +196,10 @@ export default function GuestsTable() {
                 <td className="p-3 text-sm text-slate-700">{guest.gender}</td>
                 <td className="p-3">
                   <span
-                    className={`px-2 py-1 rounded text-sm ${
-                      guest.isPrimaryGuest
+                    className={`px-2 py-1 rounded text-sm ${guest.isPrimaryGuest
                         ? "bg-green-100 text-green-700"
                         : "bg-gray-100 text-gray-700"
-                    }`}
+                      }`}
                   >
                     {guest.isPrimaryGuest ? "Yes" : "No"}
                   </span>
@@ -243,9 +243,8 @@ export default function GuestsTable() {
         <ul className="flex items-center gap-1 text-sm">
           <li>
             <button
-              className={`px-3 py-[5px] border border-gray-100 rounded bg-[#0284c7] text-white ${
-                currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`px-3 py-[5px] border border-gray-100 rounded bg-[#0284c7] text-white ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               onClick={() => goToPage(currentPage - 1)}
               disabled={currentPage === 1}
             >
@@ -257,11 +256,10 @@ export default function GuestsTable() {
             <li key={page}>
               <button
                 onClick={() => goToPage(page)}
-                className={`px-3 py-[5px] border border-gray-100 rounded ${
-                  page === currentPage
+                className={`px-3 py-[5px] border border-gray-100 rounded ${page === currentPage
                     ? "bg-[#0284c7] text-white"
                     : "hover:bg-gray-100 transition"
-                }`}
+                  }`}
               >
                 {page}
               </button>
@@ -270,11 +268,10 @@ export default function GuestsTable() {
 
           <li>
             <button
-              className={`px-3 py-[5px] border border-gray-100 rounded bg-[#0284c7] text-white ${
-                currentPage === totalPages
+              className={`px-3 py-[5px] border border-gray-100 rounded bg-[#0284c7] text-white ${currentPage === totalPages
                   ? "opacity-50 cursor-not-allowed"
                   : ""
-              }`}
+                }`}
               onClick={() => goToPage(currentPage + 1)}
               disabled={currentPage === totalPages}
             >

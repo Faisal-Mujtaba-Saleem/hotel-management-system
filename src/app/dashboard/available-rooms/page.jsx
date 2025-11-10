@@ -14,7 +14,7 @@ import { formatCurrency } from "@/utlis/formatCurrency";
 import { useDialog } from "@/contexts/modal-context/context";
 import RoomCard from "@/components/RoomCard";
 import BookingForm from "@/components/BookingForm";
-import calculateNights from "@/utlis/calculateNights";
+import calculateNights from "@/utlis/date-time-utils/calculateNights";
 
 /* ---------- Main Page ---------- */
 export default function Page() {

@@ -8,14 +8,14 @@ import { IoEyeOutline } from "react-icons/io5";
 import { useElementsHeights } from "@/contexts/elements-heights-context/context";
 import { useDialog } from "@/contexts/modal-context/context";
 import { useRooms } from "@/contexts/rooms-context/context";
-import EditRoomForm from "./EditRoomForm";
 import RoomView from "./RoomView";
+import EditRoomForm from "./EditRoomForm";
 
 export default function RoomsTable() {
   const { rooms, loading, error, fetchRooms, deleteRoom } = useRooms();
   const { topbarHeight, headerHeight } = useElementsHeights();
   const { populateModal } = useDialog();
-  
+
   // Pagination state / config
 
   // Pagination state / config
@@ -33,9 +33,13 @@ export default function RoomsTable() {
 
   // Fetch rooms from API
   useEffect(() => {
-    const ac = new AbortController();
-    fetchRooms(ac.signal);
-    return () => ac.abort();
+    let cleanup;
+    fetchRooms().then((result) => {
+      cleanup = result;
+    }).catch((err) => {
+      console.error(err.message);
+    });;
+    return cleanup;
   }, []);
 
   const totalPages = Math.max(1, Math.ceil(rooms.length / pageSize));
@@ -136,10 +140,10 @@ export default function RoomsTable() {
                   <td className="p-3">{name}</td>
                   <td className="p-3">
                     <span className={`px-2 py-1 rounded-full text-xs ${roomType === "Suite" ? "bg-purple-100 text-purple-700" :
-                        roomType === "Deluxe" ? "bg-blue-100 text-blue-700" :
-                          roomType === "Standard" ? "bg-green-100 text-green-700" :
-                            roomType === "Family" ? "bg-orange-100 text-orange-700" :
-                              "bg-gray-100 text-gray-700"
+                      roomType === "Deluxe" ? "bg-blue-100 text-blue-700" :
+                        roomType === "Standard" ? "bg-green-100 text-green-700" :
+                          roomType === "Family" ? "bg-orange-100 text-orange-700" :
+                            "bg-gray-100 text-gray-700"
                       }`}>
                       {roomType}
                     </span>
@@ -149,8 +153,8 @@ export default function RoomsTable() {
                   <td className="p-3 max-w-[200px] truncate" title={features}>{features}</td>
                   <td className="p-3">
                     <span className={`px-2 py-1 rounded-full text-xs ${status === "available" ? "bg-green-100 text-green-700" :
-                        status === "maintenance" ? "bg-yellow-100 text-yellow-700" :
-                          "bg-gray-100 text-gray-700"
+                      status === "maintenance" ? "bg-yellow-100 text-yellow-700" :
+                        "bg-gray-100 text-gray-700"
                       }`}>
                       {status}
                     </span>
@@ -197,8 +201,8 @@ export default function RoomsTable() {
               <button
                 onClick={() => goToPage(page)}
                 className={`px-3 py-[5px] border border-gray-100 rounded ${page === currentPage
-                    ? "bg-[#0284c7] text-white"
-                    : "hover:bg-gray-100 transition"
+                  ? "bg-[#0284c7] text-white"
+                  : "hover:bg-gray-100 transition"
                   }`}
               >
                 {page}
@@ -209,8 +213,8 @@ export default function RoomsTable() {
           <li>
             <button
               className={`px-3 py-[5px] border border-gray-100 rounded bg-[#0284c7] text-white ${currentPage === totalPages
-                  ? "opacity-50 cursor-not-allowed"
-                  : ""
+                ? "opacity-50 cursor-not-allowed"
+                : ""
                 }`}
               onClick={() => goToPage(currentPage + 1)}
               disabled={currentPage === totalPages}

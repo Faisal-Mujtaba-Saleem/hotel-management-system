@@ -8,14 +8,14 @@ import path from "path";
 export async function printBookingReceipt(prevState, formData) {
   try {
     // 🧩 Step 1: Get HTML content from form data
-    const printReceiptHTML = formData.get("booking_receipt");
-    if (!printReceiptHTML) {
+    const bookingReceiptHTML = formData.get("booking_receipt");
+    if (!bookingReceiptHTML) {
       throw new Error("No HTML content found for booking_receipt.");
     }
 
     // 🧩 Step 2: Convert HTML → PDF (file saved automatically by convertHTML2PDF)
     const exePath = path.resolve("node_modules/pdf-to-printer/dist/SumatraPDF-3.4.6-32.exe");
-    const pdfFilePath = await convertHTML2PDF(printReceiptHTML);
+    const pdfFilePath = await convertHTML2PDF(bookingReceiptHTML, { savePDF: true });
 
     // 🧩 Step 3: Print the PDF
     await print(pdfFilePath, {
@@ -34,7 +34,7 @@ export async function printBookingReceipt(prevState, formData) {
     }
 
     console.log("Successfully printed.");
-    
+
     // 🧩 Step 5: Return success message
     return {
       success: true,

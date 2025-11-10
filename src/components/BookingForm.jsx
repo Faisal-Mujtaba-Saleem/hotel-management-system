@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { FaBed } from "react-icons/fa";
 import { toast } from "react-toastify";
-import calculateNights from "@/utlis/calculateNights";
+import calculateNights from "@/utlis/date-time-utils/calculateNights";
 import { formatCurrency } from "@/utlis/formatCurrency";
 import { useDialog } from "@/contexts/modal-context/context";
 

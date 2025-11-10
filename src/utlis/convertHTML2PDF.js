@@ -2,7 +2,7 @@ import puppeteer from "puppeteer";
 import fs from "fs";
 import path from "path";
 
-export default async function convertHTML2PDF(htmlContent) {
+export default async function convertHTML2PDF(html, { savePDF = false, generateHtmlBoilerPlate = true }) {
   // 1️⃣ Prepare output directory (e.g. src/temp)
   const outputDir = path.join(process.cwd(), "src", "temp");
   if (!fs.existsSync(outputDir)) {
@@ -14,7 +14,9 @@ export default async function convertHTML2PDF(htmlContent) {
   const pdfFilePath = path.join(outputDir, fileName);
 
   // 3️⃣ Wrap JSX/HTML string into a complete HTML document
-  const htmlDoc = `
+  let htmlDoc = `${html}`;
+  if (generateHtmlBoilerPlate)
+    htmlDoc = `
     <!DOCTYPE html>
     <html lang="en">
       <head>
@@ -27,10 +29,11 @@ export default async function convertHTML2PDF(htmlContent) {
         </style>
       </head>
       <body class="bg-gray-100 flex items-center justify-center min-h-screen">
-        ${htmlContent}
+        ${html}
       </body>
     </html>
   `;
+
 
   // 4️⃣ Launch Puppeteer
   const browser = await puppeteer.launch({
@@ -40,19 +43,36 @@ export default async function convertHTML2PDF(htmlContent) {
   try {
     const page = await browser.newPage();
     await page.setContent(htmlDoc, { waitUntil: "networkidle0" });
+    console.log(`htmlDoc, ${htmlDoc}`);
 
     // 5️⃣ Generate PDF directly to file (no need for fs.writeFileSync)
-    await page.pdf({
-      path: pdfFilePath,
-      format: "A4",
-      printBackground: true,
-      margin: {
-        top: "20mm",
-        bottom: "20mm",
-        left: "15mm",
-        right: "15mm",
-      },
-    });
+    if (savePDF) {
+      await page.pdf({
+        path: pdfFilePath,
+        format: "A4",
+        printBackground: true,
+        margin: {
+          top: "20mm",
+          bottom: "20mm",
+          left: "15mm",
+          right: "15mm",
+        },
+      });
+    }
+    else {
+      const pdfBuffer = await page.pdf({
+        format: "A4",
+        printBackground: true,
+        margin: {
+          top: "20mm",
+          bottom: "20mm",
+          left: "15mm",
+          right: "15mm",
+        },
+      });
+
+      return pdfBuffer;
+    }
   } finally {
     await browser.close();
   }

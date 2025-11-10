@@ -3,6 +3,10 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --tw-gradient-from: #e5e7eb !important;
+  /* stone-100 fallback */
+  --tw-gradient-to: #eff6ff !important;
+  /* blue-50 fallback */
 }
 
 @theme inline {
@@ -45,7 +49,8 @@ button {
   cursor: pointer;
 }
 
-th, td {
+th,
+td {
   white-space: nowrap;
 }
 

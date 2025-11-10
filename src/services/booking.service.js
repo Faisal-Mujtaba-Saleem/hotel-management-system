@@ -94,10 +94,26 @@ export const BookingServices = {
         }
     },
 
-    async getAllBookingsFromDB() {
-        const result = await Booking.find().populate("room").populate("guests").sort({ createdAt: -1 });
-        if (!result?.length) throw new ServerError("No bookings found", 404);
-        return result;
+    // concerned function
+    async getAllBookingsFromDB(filters = {}) {
+        try {
+            const query = {};
+
+            // Apply filters if provided
+            if (filters.status) query.status = filters.status;
+            if (filters.paymentStatus) query.paymentStatus = filters.paymentStatus;
+
+            const result = await Booking.find(query)
+                .populate("room")
+                .populate("guests")
+                .sort({ createdAt: -1 });
+
+            if (!result?.length) throw new ServerError("No bookings found", 404);
+            return result;
+        } catch (error) {
+            if (error instanceof ServerError) throw error;
+            throw new ServerError(error.message || "Failed to fetch bookings", 500);
+        }
     },
 
     async getBookingByIdFromDB(_id) {

@@ -15,9 +15,17 @@ export async function POST(req) {
   }
 }
 
-export async function GET() {
+export async function GET(req) {
   try {
-    const bookings = await BookingServices.getAllBookingsFromDB();
+    const { searchParams } = new URL(req.url);
+
+    const filters = {
+      status: searchParams.get("status") || undefined, // optional status filter
+      paymentStatus: searchParams.get("paymentStatus") || undefined, // optional paymentStatus filter
+    };
+
+    const bookings = await BookingServices.getAllBookingsFromDB(filters);
+
     return NextResponse.json(bookings, { status: 200 });
   } catch (error) {
     return NextResponse.json(
