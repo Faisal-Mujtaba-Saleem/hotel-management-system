@@ -31,13 +31,17 @@ const roomSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Safe auto-increment for bulk inserts
 roomSchema.pre("save", async function (next) {
-  if (!this.isNew) return next();
-  const lastRoom = await this.constructor.findOne().sort({ room_no: -1 });
-  console.log("lastRoom?.room_no", lastRoom?.room_no);
-  
-  this.room_no = lastRoom ? lastRoom.room_no + 1 : 101;
-  next();
+  if (!this.isNew || this.room_no) return next();
+  try {
+    const lastRoom = await this.constructor.findOne().sort({ room_no: -1 }).lean();
+    console.log("Last room No:", lastRoom?.room_no);
+    this.room_no = lastRoom ? lastRoom.room_no + 1 : 101;
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 export const Room = mongoose.models.Room || mongoose.model("Room", roomSchema);

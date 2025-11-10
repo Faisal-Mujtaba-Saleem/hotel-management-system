@@ -1,4 +1,4 @@
-import "@/lib/connectDB";
+import "@/lib/mongoose/connectDB";
 import { NextResponse } from "next/server";
 import { BookingServices } from "@/services/booking.service";
 

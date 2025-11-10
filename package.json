@@ -18,6 +18,7 @@
     "mongoose-sequence": "^5.2.2",
     "next": "15.5.4",
     "nodemailer": "^7.0.10",
+    "papaparse": "^5.5.3",
     "pdf-to-printer": "^5.6.1",
     "puppeteer": "^24.29.0",
     "react": "19.1.0",

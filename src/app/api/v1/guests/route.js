@@ -1,5 +1,5 @@
 import { GuestServices } from "@/services/guest.service";
-import "@/lib/connectDB";
+import "@/lib/mongoose/connectDB";
 import { NextResponse } from "next/server";
 
 // ✅ Create Guest

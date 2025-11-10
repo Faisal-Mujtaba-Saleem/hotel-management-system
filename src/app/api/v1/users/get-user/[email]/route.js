@@ -1,5 +1,5 @@
 import { UserServices } from "@/services/user.service";
-import "@/lib/connectDB";
+import "@/lib/mongoose/connectDB";
 import { NextResponse } from "next/server";
 
 export async function GET(request, { params }) {
