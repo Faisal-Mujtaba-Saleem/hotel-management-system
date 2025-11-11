@@ -1,0 +1,6 @@
+name,roomType,price,capacity,features,img,status
+Ocean View Suite,Suite,12000,4,"WiFi, Air Conditioning, Balcony, TV",https://via.placeholder.com/400x300,available
+Deluxe King Room,Deluxe,8500,2,"WiFi, Mini Fridge, TV",https://via.placeholder.com/400x300,available
+Standard Twin,Standard,6000,2,"WiFi, Fan, TV",https://via.placeholder.com/400x300,maintenance
+Family Suite,Family,15000,5,"WiFi, Kitchenette, Balcony, TV, Air Conditioning",https://via.placeholder.com/400x300,available
+Garden Deluxe,Deluxe,9000,3,"WiFi, Garden View, Air Conditioning",https://via.placeholder.com/400x300,available
