@@ -1,6 +1,8 @@
 "use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
+export const ssr = false;
+export const fetchCache = "force-no-store";
 
 import React, { useMemo, useState, useEffect } from "react";
 import {
@@ -161,8 +163,8 @@ export default function Page() {
           <div className="flex bg-gray-100 rounded-lg">
             <button
               className={`p-2 rounded-md ${view === "grid"
-                  ? "bg-white shadow text-blue-600"
-                  : "text-gray-500"
+                ? "bg-white shadow text-blue-600"
+                : "text-gray-500"
                 }`}
               onClick={() => setView("grid")}
             >
@@ -170,8 +172,8 @@ export default function Page() {
             </button>
             <button
               className={`p-2 rounded-md ${view === "list"
-                  ? "bg-white shadow text-blue-600"
-                  : "text-gray-500"
+                ? "bg-white shadow text-blue-600"
+                : "text-gray-500"
                 }`}
               onClick={() => setView("list")}
             >
@@ -271,8 +273,8 @@ export default function Page() {
 
       <section
         className={`grid gap-4 ${view === "grid"
-            ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-            : "grid-cols-1"
+          ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+          : "grid-cols-1"
           }`}
       >
         {filtered.length === 0 ? (
