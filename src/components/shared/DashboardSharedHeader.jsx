@@ -14,7 +14,7 @@ export default function DashboardSharedHeader({
   return (
     <header
       ref={headerRef}
-      className={`border border-gray-200 text-xl text-black mb-8 py-2 px-5 font-bold bg-[#F8FAFC] ${
+      className={`border border-gray-200 text-xl text-black mb-8 py-2 px-2 font-bold bg-[#F8FAFC] ${
         !!AddBtn && `flex items-center justify-between`
       }`}
     >

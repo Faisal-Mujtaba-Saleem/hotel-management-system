@@ -37,7 +37,6 @@ roomSchema.pre("save", async function (next) {
   if (!this.isNew || this.room_no) return next();
   try {
     const lastRoom = await this.constructor.findOne().sort({ room_no: -1 }).lean();
-    console.log("Last room No:", lastRoom?.room_no);
     this.room_no = lastRoom ? lastRoom.room_no + 1 : 101;
     next();
   } catch (err) {

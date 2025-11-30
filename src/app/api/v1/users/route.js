@@ -14,7 +14,6 @@ export async function POST(req, { params }) {
 
     // Check if user already exists
     const existingUser = await User.findOne({ clerkUserId: user.id });
-    console.log(existingUser);
 
     if (!existingUser) {
       const newUser = await User.create({

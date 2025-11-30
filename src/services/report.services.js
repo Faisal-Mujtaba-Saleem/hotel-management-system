@@ -21,8 +21,6 @@ export class ReportServices {
         .filter((b) => new Date(b.createdAt).getMonth() === currentMonth)
         .reduce((sum, b) => sum + (b.paidAmount || 0), 0);
 
-      console.log({ allBookings, totalRevenue, pendingPayments, monthRevenue });
-
       return { totalRevenue, pendingPayments, monthRevenue };
     } catch (error) {
       if (error instanceof ServerError) throw error;
@@ -45,8 +43,6 @@ export class ReportServices {
         },
         { $sort: { "_id": 1 } },
       ]);
-
-      console.log({ result });
 
       return result;
     } catch (error) {
@@ -85,8 +81,6 @@ export class ReportServices {
         },
       ]);
 
-      console.log({ result });
-
       return result;
     } catch (error) {
       if (error instanceof ServerError) throw error;
@@ -121,8 +115,6 @@ export class ReportServices {
           },
         },
       ]);
-
-      console.log({ result });
 
       return result;
     } catch (error) {

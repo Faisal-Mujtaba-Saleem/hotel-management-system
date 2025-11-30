@@ -59,10 +59,6 @@ export default function BookingsTable() {
     return () => ac.abort();
   }, []);
 
-  useEffect(() => {
-    console.log(bookings);
-  }, [bookings]);
-
   const totalPages = Math.max(1, Math.ceil(bookings.length / pageSize));
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 

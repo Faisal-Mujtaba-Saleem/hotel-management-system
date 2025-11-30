@@ -39,7 +39,7 @@ export default function DashboardTopBar({ showNav, setShowNav }) {
       className={`fixed z-10 w-full h-16 flex justify-between items-center transition-all duration-400ms ${showNav ? "ps-56" : ""}`}
     >
       <div className="flex items-center gap-3">
-        <div className="ps-4 md:ps-16">
+        <div className="ps-16 md:ps-4">
           <Bars3CenterLeftIcon
             className="h-5 text-gray-700 cursor-pointer"
             onClick={() => setShowNav(!showNav)}

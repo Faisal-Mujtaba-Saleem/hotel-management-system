@@ -28,8 +28,6 @@ export default function RoomsContextProvider({ children }) {
         throw new Error(`Failed to fetch rooms (${res.status})`);
 
       const data = await res.json();
-      console.log(data);
-      
       setRooms(Array.isArray(data) ? data : data?.data || []);
     } catch (err) {
       if (err.name !== "AbortError") setError(err.message || "Failed to load rooms");
