@@ -27,6 +27,7 @@ export default async function convertHTML2PDF(html, { generateHtmlBoilerPlate = 
     if (!isLocal) {
       // CLOUD / VERCEL MODE
       const exePath = await chromium.executablePath();
+      console.log({ exePath });
 
       launchOptions = {
         args: chromium.args,
